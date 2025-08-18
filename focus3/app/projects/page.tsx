@@ -3,26 +3,28 @@
 import { useEffect, useMemo, useState } from 'react';
 import { loadProjects, saveProjects, type Project, type ProjectItemType } from '@/lib/projects';
 import Link from 'next/link';
+import { newId } from '@/lib/uid';
 
 export default function ProjectsPage() {
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [title, setTitle] = useState('');
 	const [desc, setDesc] = useState('');
 	const [newItem, setNewItem] = useState<Record<string, { type: ProjectItemType; title: string; dateIso: string }>>({});
+	const [loaded, setLoaded] = useState(false);
 
-	useEffect(() => { setProjects(loadProjects()); }, []);
-	useEffect(() => { saveProjects(projects); }, [projects]);
+	useEffect(() => { setProjects(loadProjects()); setLoaded(true); }, []);
+	useEffect(() => { if (loaded) saveProjects(projects); }, [projects, loaded]);
 
 	function addProject() {
 		const t = title.trim(); if (!t) return;
-		setProjects(prev => [...prev, { id: crypto?.randomUUID ? crypto.randomUUID() : `p_${Date.now()}`, title: t, description: desc.trim() || undefined, items: [] }]);
+		setProjects(prev => [...prev, { id: newId(), title: t, description: desc.trim() || undefined, items: [] }]);
 		setTitle(''); setDesc('');
 	}
 
 	function addItemInline(pid: string) {
 		const st = newItem[pid] || { type: 'goal', title: '', dateIso: '' };
 		const t = (st.title || '').trim(); if (!t) return;
-		const item = { id: crypto?.randomUUID ? crypto.randomUUID() : `i_${Date.now()}`, type: st.type, title: t, dateIso: st.dateIso || undefined };
+		const item = { id: newId(), type: st.type, title: t, dateIso: st.dateIso || undefined };
 		setProjects(prev => prev.map(p => p.id === pid ? { ...p, items: [...p.items, item] } : p));
 		setNewItem(prev => ({ ...prev, [pid]: { type: 'goal', title: '', dateIso: '' } }));
 	}

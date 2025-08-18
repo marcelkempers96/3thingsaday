@@ -25,7 +25,7 @@ const DURATION: Labels['duration'][] = ['15m', '30m', '60m', '90m+'];
 export default function AddTaskModal({ open, onClose, onSave }: {
 	open: boolean;
 	onClose: () => void;
-	onSave: (task: Omit<Task, 'id' | 'done'>) => void;
+	onSave: (task: Omit<Task, 'id' | 'done'>, dateKey?: string) => void;
 }) {
 	const [title, setTitle] = useState('');
 	const [category, setCategory] = useState<Category | undefined>(undefined);
@@ -35,13 +35,15 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [timeFrom, setTimeFrom] = useState<string>('');
 	const [timeTo, setTimeTo] = useState<string>('');
+	const [dateMode, setDateMode] = useState<'today' | 'tomorrow' | 'other'>('today');
+	const [otherDate, setOtherDate] = useState<string>('');
 
 	useEffect(() => { if (open) setProjects(loadProjects()); }, [open]);
 	const itemsForProject = useMemo(() => projects.find(p => p.id === projectId)?.items || [], [projects, projectId]);
 
 	useEffect(() => {
 		if (!open) {
-			setTitle(''); setCategory(undefined); setLabels({}); setProjectId(''); setProjectItemId(''); setTimeFrom(''); setTimeTo('');
+			setTitle(''); setCategory(undefined); setLabels({}); setProjectId(''); setProjectItemId(''); setTimeFrom(''); setTimeTo(''); setDateMode('today'); setOtherDate('');
 		}
 	}, [open]);
 
@@ -50,7 +52,15 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 		const finalLabels: Labels = { ...labels };
 		if (timeFrom) finalLabels.timeFromHHMM = timeFrom;
 		if (timeTo) finalLabels.timeToHHMM = timeTo;
-		onSave({ title: title.trim(), category, labels: Object.keys(finalLabels).length ? finalLabels : undefined, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
+		let dateKey: string | undefined = undefined;
+		if (dateMode === 'tomorrow') {
+			const d = new Date(); d.setDate(d.getDate() + 1);
+			dateKey = d.toISOString().slice(0, 10);
+		} else if (dateMode === 'other') {
+			if (!otherDate) return; // require date when choosing other
+			dateKey = otherDate;
+		}
+		onSave({ title: title.trim(), category, labels: Object.keys(finalLabels).length ? finalLabels : undefined, projectId: projectId || undefined, projectItemId: projectItemId || undefined }, dateKey);
 		onClose();
 	}
 
@@ -61,6 +71,18 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 				<h3 style={{ marginTop: 0 }}>Add Task</h3>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
+
+					<div>
+						<label className="small muted">Add to</label>
+						<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+							<button type="button" className={`btn ${dateMode === 'today' ? 'btn-primary' : ''}`} onClick={() => setDateMode('today')}>Today</button>
+							<button type="button" className={`btn ${dateMode === 'tomorrow' ? 'btn-primary' : ''}`} onClick={() => setDateMode('tomorrow')}>Tomorrow</button>
+							<div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+								<button type="button" className={`btn ${dateMode === 'other' ? 'btn-primary' : ''}`} onClick={() => setDateMode('other')}>Other</button>
+								{dateMode === 'other' ? <input className="input" type="date" value={otherDate} onChange={e => setOtherDate(e.target.value)} /> : null}
+							</div>
+						</div>
+					</div>
 
 					<div>
 						<label className="small muted">Project (optional)</label>
