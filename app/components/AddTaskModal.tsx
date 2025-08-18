@@ -59,7 +59,6 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 		<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 50 }}>
 			<div className="panel" style={{ width: 'min(640px, 92vw)', maxHeight: '90vh', overflow: 'auto' }}>
 				<h3 style={{ marginTop: 0 }}>Add Task</h3>
-				<div className="small muted">Importance and urgency are optional.</div>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
@@ -88,14 +87,14 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 
 					<div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
 						<div>
-							<label className="small muted">Importance</label>
+							<label className="small muted">Importance (optional)</label>
 							<select className="input" value={labels.importance ?? ''} onChange={(e) => setLabels(l => ({ ...l, importance: (e.target.value || undefined) as any }))}>
 								<option value="">—</option>
 								{IMPORTANCE.map(e => <option key={e} value={e}>{e}</option>)}
 							</select>
 						</div>
 						<div>
-							<label className="small muted">Urgency</label>
+							<label className="small muted">Urgency (optional)</label>
 							<select className="input" value={labels.urgency ?? ''} onChange={(e) => setLabels(l => ({ ...l, urgency: (e.target.value || undefined) as any }))}>
 								<option value="">—</option>
 								{URGENCY.map(p => <option key={p} value={p}>{p}</option>)}
