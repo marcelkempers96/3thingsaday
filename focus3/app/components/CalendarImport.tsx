@@ -111,6 +111,7 @@ export default function CalendarImport() {
 		saveToday(next);
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
 		try { window.dispatchEvent(new Event('focus3:data')); } catch {}
+		try { window.dispatchEvent(new Event('focus3:refresh')); } catch {}
 	}
 
 	return (
