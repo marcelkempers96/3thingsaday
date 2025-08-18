@@ -10,6 +10,17 @@ import AddTaskModal from './components/AddTaskModal';
 import QuoteOfTheDay from './components/QuoteOfTheDay';
 import CalendarImport from './components/CalendarImport';
 
+function formatEventTime(ev: { start?: { date?: string; dateTime?: string }, end?: { date?: string; dateTime?: string } }) {
+  const start = ev.start?.dateTime || ev.start?.date;
+  const end = ev.end?.dateTime || ev.end?.date;
+  if (!start) return '';
+  const s = new Date(start);
+  const e = end ? new Date(end) : null;
+  const sStr = s.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const eStr = e ? e.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '';
+  return e ? `${sStr} – ${eStr}` : sStr;
+}
+
 export default function Page() {
   const { language } = useSettings();
   const S = getStrings(language);
@@ -124,7 +135,7 @@ export default function Page() {
           {data.tasks.map((t, idx) => (
             <div
               key={t.id}
-              className="task"
+              className={`task ${t.category ? `cat-${t.category}` : ''} ${t.source === 'google' ? 'badge-google' : ''}`}
               draggable
               onDragStart={(e) => onDragStart(idx, e)}
               onDragOver={(e) => onDragOver(idx, e)}
@@ -136,9 +147,11 @@ export default function Page() {
               </button>
               <div style={{ opacity: t.done ? 0.6 : 1 }}>
                 <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
-                {(t.category || t.labels) && (
+                {(t.category || t.labels || t.startIso) && (
                   <div className="small muted">
                     {t.category ? categoryLabel(t.category) : ''}
+                    {t.startIso ? ` · ${formatEventTime({ start: { dateTime: t.startIso }, end: t.endIso ? { dateTime: t.endIso } : undefined })}` : ''}
+                    {t.attendee ? ` · with ${t.attendee}` : ''}
                     {t.labels ? ` · ${formatLabels(t.labels)}` : ''}
                   </div>
                 )}
