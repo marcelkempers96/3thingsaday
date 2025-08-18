@@ -111,7 +111,6 @@ export default function Page() {
             </div>
             <div className="small muted">{S.timeLeft}: <strong>{formatCountdown(remaining)}</strong></div>
           </div>
-          <div className="small muted" style={{ marginTop: 4 }}>Drag to reorder</div>
           <hr className="hr" />
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -133,6 +132,7 @@ export default function Page() {
             <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
           </div>
           <div className="small muted" style={{ marginTop: 8 }}>{S.aim}</div>
+          <div className="small muted" style={{ marginTop: 4 }}>Drag to reorder</div>
 
           <div className="tasks" style={{ marginTop: 16 }}>
             {data.tasks.map((t, idx) => (

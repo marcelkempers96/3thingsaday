@@ -116,7 +116,6 @@ export default function CalendarImport() {
 	return (
 		<section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 			<h3 style={{ marginTop: 0 }}>Google Calendar</h3>
-			<div className="small muted">Connect to google to fetch daily meetings into your task list</div>
 			<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
 				<button className="btn btn-primary" onClick={signIn}>{token ? 'Signed in' : 'Sign in to Google'}</button>
 				{token ? <span className="small" style={{ color: 'var(--accent)' }}>✓ Signed in{accountName ? ` as: ${accountName}` : ''}</span> : null}
