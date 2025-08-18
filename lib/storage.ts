@@ -19,12 +19,19 @@ export type Labels = {
 	duration?: '15m' | '30m' | '60m' | '90m+';
 };
 
+export type SourcePlatform = 'google' | 'teams' | 'zoom';
+
 export type Task = {
 	id: string;
 	title: string;
 	done: boolean;
 	category?: Category;
 	labels?: Labels;
+	// Optional calendar metadata
+	source?: SourcePlatform;
+	startIso?: string;
+	endIso?: string;
+	attendee?: string;
 };
 
 export type DailyTasks = {

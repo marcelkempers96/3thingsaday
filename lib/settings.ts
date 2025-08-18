@@ -15,7 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
   language: 'en',
   font: 'baloo',
-  googleClientId: ''
+  googleClientId: '926648035624-ncv9e26jnh5rpm6tgte0jjdqul64b1j3.apps.googleusercontent.com'
 };
 
 export function loadSettings(): Settings {

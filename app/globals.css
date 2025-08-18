@@ -258,10 +258,17 @@ select.input {
 .task { cursor: grab; }
 .task:active { cursor: grabbing; }
 
-/* Subtle gradient from top (accent tint) to bottom (white/panel) */
-.tasks .task { background: linear-gradient(180deg, rgba(88,204,2,0.10), var(--panel)); }
-.tasks .task:nth-child(1) { background: linear-gradient(180deg, rgba(88,204,2,0.20), var(--panel)); }
-.tasks .task:nth-child(2) { background: linear-gradient(180deg, rgba(88,204,2,0.16), var(--panel)); }
-.tasks .task:nth-child(3) { background: linear-gradient(180deg, rgba(88,204,2,0.12), var(--panel)); }
-.tasks .task:nth-child(4) { background: linear-gradient(180deg, rgba(88,204,2,0.10), var(--panel)); }
-.tasks .task:nth-child(n+5) { background: linear-gradient(180deg, rgba(88,204,2,0.06), var(--panel)); }
+/* Remove gradient tint; use solid backgrounds by category */
+.tasks .task { background: var(--panel); }
+.task.badge-google::before { content: 'G'; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; background: #4285F4; color: white; font-size: 11px; margin-right: 6px; }
+
+.task.cat-meetings { background: #e8f0fe; border-color: #c6dafc; }
+.task.cat-deep_work { background: #eaffea; border-color: #c9f2c9; }
+.task.cat-admin_email { background: #fff7e6; border-color: #ffe2af; }
+.task.cat-planning_review { background: #f5f0ff; border-color: #e3d7ff; }
+.task.cat-research_learning { background: #e6fbff; border-color: #bfefff; }
+.task.cat-writing_creative { background: #fff0f6; border-color: #ffd6e7; }
+.task.cat-health_fitness { background: #effdf5; border-color: #c9f5de; }
+.task.cat-family_friends { background: #f0f9ff; border-color: #cdefff; }
+.task.cat-errands_chores { background: #f8fafc; border-color: #e5e7eb; }
+.task.cat-hobbies_growth { background: #f0fff4; border-color: #c6f6d5; }

@@ -28,6 +28,9 @@ type EventItem = {
 	summary: string;
 	start?: { date?: string; dateTime?: string };
 	end?: { date?: string; dateTime?: string };
+	attendees?: { email?: string; displayName?: string; organizer?: boolean }[];
+	hangoutLink?: string;
+	conferenceData?: unknown;
 };
 
 export default function CalendarImport() {
@@ -80,10 +83,15 @@ export default function CalendarImport() {
 			url.searchParams.set('timeMax', end.toISOString());
 			url.searchParams.set('singleEvents', 'true');
 			url.searchParams.set('orderBy', 'startTime');
+			url.searchParams.set('maxResults', '50');
 			const resp = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
 			if (!resp.ok) throw new Error('HTTP ' + resp.status);
 			const data = await resp.json();
-			const items: EventItem[] = (data.items || []).map((it: any) => ({ id: it.id, summary: it.summary, start: it.start, end: it.end }));
+			const items: EventItem[] = (data.items || []).map((it: any) => ({
+				id: it.id, summary: it.summary,
+				start: it.start, end: it.end,
+				attendees: it.attendees, hangoutLink: it.hangoutLink, conferenceData: it.conferenceData
+			}));
 			setEvents(items);
 		} catch (e) {
 			alert('Failed to fetch events. Check console.');
@@ -96,7 +104,17 @@ export default function CalendarImport() {
 	function addEventAsTask(item: EventItem) {
 		const day = loadToday();
 		const title = item.summary || 'Untitled event';
-		const next = upsertTask(day, { id: crypto.randomUUID(), title, done: false, category: 'meetings' });
+		const attendee = (item.attendees || []).find(a => !a.organizer)?.displayName || (item.attendees || []).find(a => !a.organizer)?.email;
+		const next = upsertTask(day, {
+			id: crypto.randomUUID(),
+			title,
+			done: false,
+			category: 'meetings',
+			source: 'google',
+			startIso: item.start?.dateTime || item.start?.date,
+			endIso: item.end?.dateTime || item.end?.date,
+			attendee: attendee
+		});
 		saveToday(next);
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
 	}
@@ -108,7 +126,7 @@ export default function CalendarImport() {
 				<div className="small muted">Add your Google OAuth Client ID in Preferences to enable Calendar import.</div>
 			) : (
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-					<button className="btn btn-primary" onClick={signIn}>Sign in to Google</button>
+					<button className="btn btn-primary" onClick={signIn}>{token ? 'Signed in' : 'Sign in to Google'}</button>
 					<button className="btn" disabled={!token || loading} onClick={fetchTodayEvents}>{loading ? 'Loading…' : 'Fetch today\'s events'}</button>
 				</div>
 			)}
@@ -118,8 +136,8 @@ export default function CalendarImport() {
 					{events.map(ev => (
 						<div key={ev.id} className="task" style={{ gridTemplateColumns: '1fr auto' }}>
 							<div>
-								<div>{ev.summary}</div>
-								<div className="small muted">{formatEventTime(ev)}</div>
+								<div>📅 {ev.summary}</div>
+								<div className="small muted">{formatEventTime(ev)} {formatAttendee(ev)}</div>
 							</div>
 							<button className="btn" onClick={() => addEventAsTask(ev)}>Add</button>
 						</div>
@@ -139,4 +157,10 @@ function formatEventTime(ev: EventItem): string {
 	const sStr = s.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 	const eStr = e ? e.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '';
 	return e ? `${sStr} – ${eStr}` : sStr;
+}
+
+function formatAttendee(ev: EventItem): string {
+	const a = (ev.attendees || []).find(x => !x.organizer);
+	if (!a) return '';
+	return `· with ${a.displayName || a.email}`;
 }
