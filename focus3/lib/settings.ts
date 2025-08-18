@@ -24,7 +24,10 @@ export function loadSettings(): Settings {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Settings;
-    return { ...DEFAULT_SETTINGS, ...parsed };
+    const merged: Settings = { ...DEFAULT_SETTINGS, ...parsed };
+    // Fallback to default if saved value is empty/undefined
+    if (!merged.googleClientId) merged.googleClientId = DEFAULT_SETTINGS.googleClientId;
+    return merged;
   } catch {
     return DEFAULT_SETTINGS;
   }
