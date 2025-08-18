@@ -30,18 +30,22 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 	const [title, setTitle] = useState('');
 	const [category, setCategory] = useState<Category | undefined>(undefined);
 	const [labels, setLabels] = useState<Labels>({});
+	const [projectId, setProjectId] = useState<string>('');
+	const [projectItemId, setProjectItemId] = useState<string>('');
 
 	useEffect(() => {
 		if (!open) {
 			setTitle('');
 			setCategory(undefined);
 			setLabels({});
+			setProjectId('');
+			setProjectItemId('');
 		}
 	}, [open]);
 
 	function submit() {
 		if (!title.trim()) return;
-		onSave({ title: title.trim(), category, labels: Object.keys(labels).length ? labels : undefined });
+		onSave({ title: title.trim(), category, labels: Object.keys(labels).length ? labels : undefined, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
 		onClose();
 	}
 
@@ -94,6 +98,16 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 								<option value="">—</option>
 								{DURATION.map(d => <option key={d} value={d}>{d}</option>)}
 							</select>
+						</div>
+					</div>
+					<div style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
+						<div>
+							<label className="small muted">Project ID (optional)</label>
+							<input className="input" placeholder="Paste a Project ID" value={projectId} onChange={e => setProjectId(e.target.value)} />
+						</div>
+						<div>
+							<label className="small muted">Item ID (optional)</label>
+							<input className="input" placeholder="Paste a Project Item ID" value={projectItemId} onChange={e => setProjectItemId(e.target.value)} />
 						</div>
 					</div>
 				</div>

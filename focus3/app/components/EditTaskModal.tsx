@@ -28,25 +28,29 @@ export default function EditTaskModal({ open, task, onClose, onSave }: {
 	const [title, setTitle] = useState('');
 	const [category, setCategory] = useState<Category | undefined>(undefined);
 	const [labels, setLabels] = useState<Labels>({});
+	const [projectId, setProjectId] = useState<string>('');
+	const [projectItemId, setProjectItemId] = useState<string>('');
 
 	useEffect(() => {
 		if (open && task) {
 			setTitle(task.title);
 			setCategory(task.category);
 			setLabels(task.labels || {});
+			setProjectId(task.projectId || '');
+			setProjectItemId(task.projectItemId || '');
 		}
 	}, [open, task]);
 
 	function submit() {
 		if (!task) return;
-		onSave({ ...task, title: title.trim() || task.title, category, labels });
+		onSave({ ...task, title: title.trim() || task.title, category, labels, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
 		onClose();
 	}
 
 	if (!open || !task) return null;
 	return (
-		<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 50 }}>
-			<div className="panel" style={{ width: 'min(640px, 92vw)' }}>
+		<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={onClose}>
+			<div className="panel" style={{ width: 'min(640px, 92vw)' }} onClick={e => e.stopPropagation()}>
 				<h3 style={{ marginTop: 0 }}>Edit Task</h3>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -57,20 +61,14 @@ export default function EditTaskModal({ open, task, onClose, onSave }: {
 							{CATEGORY_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
 						</select>
 					</div>
-					<div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+					<div style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
 						<div>
-							<label className="small muted">Urgency</label>
-							<select className="input" value={labels.urgency ?? ''} onChange={(e) => setLabels(l => ({ ...l, urgency: (e.target.value || undefined) as any }))}>
-								<option value="">—</option>
-								{URGENCY.map(p => <option key={p} value={p}>{p}</option>)}
-							</select>
+							<label className="small muted">Project ID</label>
+							<input className="input" value={projectId} onChange={e => setProjectId(e.target.value)} />
 						</div>
 						<div>
-							<label className="small muted">Importance</label>
-							<select className="input" value={labels.importance ?? ''} onChange={(e) => setLabels(l => ({ ...l, importance: (e.target.value || undefined) as any }))}>
-								<option value="">—</option>
-								{IMPORTANCE.map(e => <option key={e} value={e}>{e}</option>)}
-							</select>
+							<label className="small muted">Item ID</label>
+							<input className="input" value={projectItemId} onChange={e => setProjectItemId(e.target.value)} />
 						</div>
 					</div>
 				</div>

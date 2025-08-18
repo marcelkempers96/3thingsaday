@@ -31,11 +31,12 @@ export type Task = {
 	done: boolean;
 	category?: Category;
 	labels?: Labels;
-	// Optional calendar metadata
 	source?: SourcePlatform;
 	startIso?: string;
 	endIso?: string;
 	attendee?: string;
+	projectId?: string;
+	projectItemId?: string;
 };
 
 export type DailyTasks = {

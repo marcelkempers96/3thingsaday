@@ -178,12 +178,13 @@ export default function Page() {
               </button>
               <div style={{ opacity: t.done ? 0.6 : 1 }} onClick={() => onEdit(t)}>
                 <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
-                {(t.category || t.labels || t.startIso) && (
+                {(t.category || t.labels || t.startIso || t.projectId) && (
                   <div className="small muted">
                     {t.category ? categoryLabel(t.category) : ''}
                     {t.startIso ? ` · ${formatEventTime({ start: { dateTime: t.startIso }, end: t.endIso ? { dateTime: t.endIso } : undefined })}` : ''}
                     {t.attendee ? ` · with ${t.attendee}` : ''}
                     {t.labels ? ` · ${formatLabelsModern(t.labels)}` : ''}
+                    {t.projectId ? ` · Project: ${t.projectId}${t.projectItemId ? ` / ${t.projectItemId}` : ''}` : ''}
                   </div>
                 )}
               </div>
