@@ -29,11 +29,11 @@ export default function ResponsiveHeader() {
 			</nav>
 
 			<div className="mobile-only">
-				<button className="btn btn-primary" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-controls="mobile-menu">Menu ▾</button>
+				<button className="btn btn-primary" onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }} aria-expanded={open} aria-controls="mobile-menu">Menu ▾</button>
 			</div>
 
 			{open && (
-				<div id="mobile-menu" className="panel" style={{ position: 'absolute', right: 24, top: 'calc(56px + env(safe-area-inset-top))', minWidth: 220, zIndex: 20 }}>
+				<div id="mobile-menu" className="panel" style={{ position: 'absolute', right: 24, top: 'calc(56px + env(safe-area-inset-top))', minWidth: 220, zIndex: 20 }} onClick={() => setOpen(false)}>
 					<div className="tasks">
 						<Link href="/" prefetch={false} className={pathname === '/' ? 'active' : ''} onClick={() => setOpen(false)}>Today</Link>
 						<Link href="/achievements" prefetch={false} className={pathname?.startsWith('/achievements') ? 'active' : ''} onClick={() => setOpen(false)}>Achievements</Link>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, reorderTasks, type Task, type Category } from '@/lib/storage';
 import { loadAllDays, saveAllDays } from '@/lib/storage';
-import { formatCountdown } from '@/lib/time';
+import { formatCountdown, getTodayKey } from '@/lib/time';
 import Link from 'next/link';
 import { useSettings } from './providers';
 import { getStrings } from '@/lib/i18n';
@@ -110,7 +110,7 @@ export default function Page() {
   function addQuickTask() {
     const title = input.trim(); if (!title) return;
     const d = new Date(); if (selectedDayMode === 'tomorrow') d.setDate(d.getDate() + 1);
-    const key = d.toISOString().slice(0,10);
+    const key = getTodayKey(d.getTime());
     addTitleToDate(key);
   }
   
@@ -120,13 +120,13 @@ export default function Page() {
     const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
     const updated = upsertTask(day, { id: newId(), done: false, ...t });
     all[dateKey] = updated; saveAllDays(all);
-    const todayKey = new Date().toISOString().slice(0,10);
+    const todayKey = getTodayKey();
     if (dateKey === todayKey) setData(updated);
   }
   function addForDay(offset: number) {
     const title = input.trim(); if (!title) return;
     const target = new Date(); target.setDate(target.getDate() + offset);
-    addTitleToDate(target.toISOString().slice(0,10));
+    addTitleToDate(getTodayKey(target.getTime()));
   }
   function addForDate(dateKey: string) {
     const title = input.trim(); if (!title) return;
@@ -144,8 +144,9 @@ export default function Page() {
     const labels = extraLabels && Object.keys(extraLabels).length ? extraLabels : undefined;
     const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined, labels });
     all[dateKey] = updated; saveAllDays(all);
-    if (dateKey === new Date().toISOString().slice(0,10)) setData(updated);
+    if (dateKey === getTodayKey()) setData(updated);
     setInput('');
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
   }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
