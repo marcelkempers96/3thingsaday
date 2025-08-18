@@ -28,7 +28,6 @@ export default function Page() {
   const settings = useSettings();
   const { language } = settings;
   const S = getStrings(language);
-
   const [data, setData] = useState<DailyTasks>(loadToday());
   const [input, setInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | ''>('');
@@ -39,14 +38,14 @@ export default function Page() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const projects = useMemo(() => loadProjects(), []);
   const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
-
+  
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
-
+  
   useEffect(() => { saveToday(data); }, [data]);
-
+  
   useEffect(() => {
     function onRefresh() { setData(loadToday()); }
     window.addEventListener('focus3:refresh', onRefresh);
@@ -58,9 +57,8 @@ export default function Page() {
       window.removeEventListener('storage', onRefresh);
     };
   }, []);
-
+  
   const remaining = useMemo(() => {
-    // use settings target
     const { countdownMode, sleepTimeHHMM, customTimeHHMM, mealTimes } = settings;
     const d = new Date(now);
     function parseHHMM(hhmm?: string) {
@@ -78,20 +76,19 @@ export default function Page() {
       const list = [mealTimes?.breakfast, mealTimes?.lunch, mealTimes?.dinner].map(parseHHMM).filter((x): x is number => typeof x === 'number').sort((a, b) => a - b);
       return list[0] ?? 0;
     }
-    // default end of day
     const end = new Date(d); end.setHours(23,59,59,999); return Math.max(0, end.getTime() - now);
   }, [now, settings.countdownMode, settings.sleepTimeHHMM, settings.customTimeHHMM, settings.mealTimes]);
-
+  
   const doneCount = data.tasks.filter(t => t.done).length;
   const progress = Math.min(100, Math.round((doneCount / Math.max(1, data.tasks.length)) * 100));
-
+  
   function addQuickTask() {
     const title = input.trim();
     if (!title) return;
     setData(prev => upsertTask(prev, { id: newId(), title, done: false, category: selectedCategory || undefined }));
     setInput('');
   }
-
+  
   function addDetailedTask(t: Omit<Task, 'id' | 'done'>) { setData(prev => upsertTask(prev, { id: newId(), done: false, ...t })); }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
@@ -102,89 +99,89 @@ export default function Page() {
   function onEdit(t: Task) { setEditTask(t); setEditOpen(true); }
   function saveEditedTask(updated: Task) { setData(prev => { const idx = prev.tasks.findIndex(x => x.id === updated.id); if (idx === -1) return prev; const next = { ...prev, tasks: [...prev.tasks] }; next.tasks[idx] = updated; return next; }); }
 
-  const dayDate = useMemo(() => new Date(now).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), [now]);
+    const dayDate = useMemo(() => new Date(now).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), [now]);
 
-  return (
-    <main className="grid grid-2" style={{ marginTop: 8 }}>
-      <section className="panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-          <div>
-            <div className="small muted" style={{ marginBottom: 4 }}>{dayDate}</div>
-            <h2 style={{ margin: 0 }}>{S.today}</h2>
-          </div>
-          <div className="small muted">{S.timeLeft}: <strong>{formatCountdown(remaining)}</strong></div>
-        </div>
-        <div className="small muted" style={{ marginTop: 4 }}>Drag to reorder</div>
-        <hr className="hr" />
-
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }} onChange={(e) => setInput(e.target.value)} />
-          <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
-            <option value="">Category</option>
-            <option value="deep_work">Deep Work / Focus</option>
-            <option value="meetings">Meetings</option>
-            <option value="admin_email">Admin & Email</option>
-            <option value="planning_review">Planning & Review</option>
-            <option value="research_learning">Research & Learning</option>
-            <option value="writing_creative">Writing / Creative</option>
-            <option value="health_fitness">Health & Fitness</option>
-            <option value="family_friends">Family & Friends</option>
-            <option value="errands_chores">Errands & Chores</option>
-            <option value="hobbies_growth">Hobbies / Personal Growth</option>
-          </select>
-          <button className="btn btn-primary" onClick={addQuickTask}>{S.addButton}</button>
-          <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
-        </div>
-        <div className="small muted" style={{ marginTop: 8 }}>{S.aim}</div>
-
-        <div className="tasks" style={{ marginTop: 16 }}>
-          {data.tasks.map((t, idx) => (
-            <div key={t.id} className={`task ${t.category ? `cat-${t.category}` : ''}`} draggable onDragStart={(e) => onDragStart(idx, e)} onDragOver={(e) => onDragOver(idx, e)} onDrop={(e) => onDrop(idx, e)} onDragEnd={onDragEnd}>
-              <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>{t.done ? '✓' : ''}</button>
-              <div style={{ opacity: t.done ? 0.6 : 1 }} onClick={() => onEdit(t)}>
-                <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
-                {(t.category || t.labels || t.startIso || t.projectId) && (
-                  <div className="small muted">
-                    {t.category ? categoryLabel(t.category) : ''}
-                    {t.startIso ? ` · ${formatEventTime({ start: { dateTime: t.startIso }, end: t.endIso ? { dateTime: t.endIso } : undefined })}` : ''}
-                    {t.attendee ? ` · with ${t.attendee}` : ''}
-                    {t.labels ? ` · ${formatLabelsModern(t.labels)}` : ''}
-                    {t.projectId ? ` · Project: ${projectMap[t.projectId] || 'Unknown'}` : ''}
-                  </div>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button className="btn" onClick={() => remove(t.id)} aria-label="Delete">✕</button>
-              </div>
+    return (
+      <main className="grid grid-2" style={{ marginTop: 8 }}>
+        <section className="panel">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+            <div>
+              <div className="small muted" style={{ marginBottom: 4 }}>{dayDate}</div>
+              <h2 style={{ margin: 0 }}>{S.today}</h2>
             </div>
-          ))}
-        </div>
+            <div className="small muted">{S.timeLeft}: <strong>{formatCountdown(remaining)}</strong></div>
+          </div>
+          <div className="small muted" style={{ marginTop: 4 }}>Drag to reorder</div>
+          <hr className="hr" />
 
-        <div style={{ marginTop: 16 }}>
-          <div className="progress"><span style={{ width: `${progress}%` }} /></div>
-          <div className="small muted" style={{ marginTop: 6 }}>{getStrings(language).tasksDoneShort(doneCount, data.tasks.length || 3)}</div>
-        </div>
-      </section>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }} onChange={(e) => setInput(e.target.value)} />
+            <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
+              <option value="">Category</option>
+              <option value="deep_work">Deep Work / Focus</option>
+              <option value="meetings">Meetings</option>
+              <option value="admin_email">Admin & Email</option>
+              <option value="planning_review">Planning & Review</option>
+              <option value="research_learning">Research & Learning</option>
+              <option value="writing_creative">Writing / Creative</option>
+              <option value="health_fitness">Health & Fitness</option>
+              <option value="family_friends">Family & Friends</option>
+              <option value="errands_chores">Errands & Chores</option>
+              <option value="hobbies_growth">Hobbies / Personal Growth</option>
+            </select>
+            <button className="btn btn-primary" onClick={addQuickTask}>{S.addButton}</button>
+            <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
+          </div>
+          <div className="small muted" style={{ marginTop: 8 }}>{S.aim}</div>
 
-      <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h3 style={{ margin: 0 }}>Motivation</h3>
-        <p className="muted small" style={{ marginTop: 0 }}>{getStrings(language).motivation}</p>
-        <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
-        <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
-        <QuoteOfTheDay />
-      </aside>
+          <div className="tasks" style={{ marginTop: 16 }}>
+            {data.tasks.map((t, idx) => (
+              <div key={t.id} className={`task ${t.category ? `cat-${t.category}` : ''}`} draggable onDragStart={(e) => onDragStart(idx, e)} onDragOver={(e) => onDragOver(idx, e)} onDrop={(e) => onDrop(idx, e)} onDragEnd={onDragEnd}>
+                <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>{t.done ? '✓' : ''}</button>
+                <div style={{ opacity: t.done ? 0.6 : 1 }} onClick={() => onEdit(t)}>
+                  <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
+                  {(t.category || t.labels || t.startIso || t.projectId) && (
+                    <div className="small muted">
+                      {t.category ? categoryLabel(t.category) : ''}
+                      {t.startIso ? ` · ${formatEventTime({ start: { dateTime: t.startIso }, end: t.endIso ? { dateTime: t.endIso } : undefined })}` : ''}
+                      {t.attendee ? ` · with ${t.attendee}` : ''}
+                      {t.labels ? ` · ${formatLabelsModern(t.labels)}` : ''}
+                      {t.projectId ? ` · Project: ${projectMap[t.projectId] || 'Unknown'}` : ''}
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button className="btn" onClick={() => remove(t.id)} aria-label="Delete">✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
 
-      <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h3 style={{ margin: 0 }}>Integrations</h3>
-        <div className="small muted">Google Calendar</div>
-        <CalendarImport />
-      </aside>
+          <div style={{ marginTop: 16 }}>
+            <div className="progress"><span style={{ width: `${progress}%` }} /></div>
+            <div className="small muted" style={{ marginTop: 6 }}>{getStrings(language).tasksDoneShort(doneCount, data.tasks.length || 3)}</div>
+          </div>
+        </section>
 
-      <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
-      <EditTaskModal open={editOpen} task={editTask} onClose={() => setEditOpen(false)} onSave={saveEditedTask} />
-    </main>
-  );
-}
+        <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h3 style={{ margin: 0 }}>Motivation</h3>
+          <p className="muted small" style={{ marginTop: 0 }}>{getStrings(language).motivation}</p>
+          <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
+          <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
+          <QuoteOfTheDay />
+        </aside>
+
+        <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h3 style={{ margin: 0 }}>Integrations</h3>
+          <div className="small muted">Google Calendar</div>
+          <CalendarImport />
+        </aside>
+
+        <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
+        <EditTaskModal open={editOpen} task={editTask} onClose={() => setEditOpen(false)} onSave={saveEditedTask} />
+      </main>
+    );
+  }
 
 function emojiForCategory(c?: Category) { switch (c) { case 'deep_work': return '🧠'; case 'meetings': return '📅'; case 'admin_email': return '📧'; case 'planning_review': return '🗂️'; case 'research_learning': return '🔎'; case 'writing_creative': return '✍️'; case 'health_fitness': return '💪'; case 'family_friends': return '👨‍👩‍👧‍👦'; case 'errands_chores': return '🧹'; case 'hobbies_growth': return '🌱'; default: return ''; } }
 function categoryLabel(c: Task['category']): string { switch (c) { case 'deep_work': return 'Deep Work / Focus'; case 'meetings': return 'Google Meetings'; case 'admin_email': return 'Admin & Email'; case 'planning_review': return 'Planning & Review'; case 'research_learning': return 'Research & Learning'; case 'writing_creative': return 'Writing / Creative'; case 'health_fitness': return 'Health & Fitness'; case 'family_friends': return 'Family & Friends'; case 'errands_chores': return 'Errands & Chores'; case 'hobbies_growth': return 'Hobbies / Personal Growth'; default: return ''; } }
