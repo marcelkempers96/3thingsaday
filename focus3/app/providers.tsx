@@ -15,6 +15,7 @@ export type SettingsContextValue = Settings & {
   setCustomTime: (hhmm: string) => void;
   setMealTimes: (t: { breakfast: string; lunch: string; dinner: string }) => void;
   setColorScheme: (c: ColorScheme) => void;
+  setRememberGoogle: (b: boolean) => void;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -41,7 +42,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     const clsDark = 'theme-dark';
     document.body.classList.remove(clsLight, clsDark);
     document.body.classList.add(settings.theme === 'dark' ? clsDark : clsLight);
-    // color scheme class
     const colorClasses = ['color-green','color-blue','color-purple','color-orange','color-rose'];
     document.body.classList.remove(...colorClasses);
     document.body.classList.add(`color-${settings.colorScheme}`);
@@ -58,7 +58,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     setSleepTime: (hhmm) => setSettings(s => ({ ...s, sleepTimeHHMM: hhmm })),
     setCustomTime: (hhmm) => setSettings(s => ({ ...s, customTimeHHMM: hhmm })),
     setMealTimes: (t) => setSettings(s => ({ ...s, mealTimes: t })),
-    setColorScheme: (c) => setSettings(s => ({ ...s, colorScheme: c }))
+    setColorScheme: (c) => setSettings(s => ({ ...s, colorScheme: c })),
+    setRememberGoogle: (b) => setSettings(s => ({ ...s, rememberGoogle: b }))
   }), [settings]);
 
   const fontClass = settings.font === 'nunito' ? fontNunito.className : settings.font === 'inter' ? fontInter.className : fontBaloo.className;
