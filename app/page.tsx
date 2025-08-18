@@ -10,6 +10,7 @@ import AddTaskModal from './components/AddTaskModal';
 import QuoteOfTheDay from './components/QuoteOfTheDay';
 import CalendarImport from './components/CalendarImport';
 import EditTaskModal from './components/EditTaskModal';
+import { newId } from '@/lib/uid';
 
 function formatEventTime(ev: { start?: { date?: string; dateTime?: string }, end?: { date?: string; dateTime?: string } }) {
   const start = ev.start?.dateTime || ev.start?.date;
@@ -84,11 +85,11 @@ export default function Page() {
   function addQuickTask() {
     const title = input.trim();
     if (!title) return;
-    setData(prev => upsertTask(prev, { id: crypto.randomUUID(), title, done: false, category: selectedCategory || undefined }));
+    setData(prev => upsertTask(prev, { id: newId(), title, done: false, category: selectedCategory || undefined }));
     setInput('');
   }
 
-  function addDetailedTask(t: Omit<Task, 'id' | 'done'>) { setData(prev => upsertTask(prev, { id: crypto.randomUUID(), done: false, ...t })); }
+  function addDetailedTask(t: Omit<Task, 'id' | 'done'>) { setData(prev => upsertTask(prev, { id: newId(), done: false, ...t })); }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
   function onDragStart(index: number, e: React.DragEvent) { setDragIndex(index); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)); }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSettings } from '@/app/providers';
 import { upsertTask, loadToday, saveToday } from '@/lib/storage';
 import { driveUploadAppData, driveListAppData, driveDownloadAppData } from '@/lib/drive';
+import { newId } from '@/lib/uid';
 
 // Minimal gapi-free approach: Google Identity Services for OAuth2 token
 // and direct fetch to Calendar API endpoints.
@@ -145,7 +146,7 @@ export default function CalendarImport() {
 		const day = loadToday();
 		const title = item.summary || 'Untitled event';
 		const attendee = (item.attendees || []).find(a => !a.organizer)?.displayName || (item.attendees || []).find(a => !a.organizer)?.email;
-		const next = upsertTask(day, { id: crypto.randomUUID(), title, done: false, category: 'meetings', source: 'google', startIso: item.start?.dateTime || item.start?.date, endIso: item.end?.dateTime || item.end?.date, attendee });
+		const next = upsertTask(day, { id: newId(), title, done: false, category: 'meetings', source: 'google', startIso: item.start?.dateTime || item.start?.date, endIso: item.end?.dateTime || item.end?.date, attendee });
 		saveToday(next);
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
 		try { window.dispatchEvent(new Event('focus3:data')); } catch {}
