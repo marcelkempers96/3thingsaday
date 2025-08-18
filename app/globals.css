@@ -145,6 +145,12 @@ button {
   color: var(--text);
 }
 
+select.input {
+	padding: 12px 14px;
+	height: 44px;
+	line-height: 20px;
+}
+
 .tasks {
   display: flex;
   flex-direction: column;
@@ -247,3 +253,15 @@ button {
 .theme-dark .progress { background: rgba(255,255,255,0.06); border-color: var(--border); }
 .theme-dark .nav { background: rgba(255,255,255,0.03); }
 .theme-dark .badge { background: rgba(255,255,255,0.02); }
+
+/* Drag handle hint */
+.task { cursor: grab; }
+.task:active { cursor: grabbing; }
+
+/* Subtle gradient from top (accent tint) to bottom (white/panel) */
+.tasks .task { background: linear-gradient(180deg, rgba(88,204,2,0.10), var(--panel)); }
+.tasks .task:nth-child(1) { background: linear-gradient(180deg, rgba(88,204,2,0.20), var(--panel)); }
+.tasks .task:nth-child(2) { background: linear-gradient(180deg, rgba(88,204,2,0.16), var(--panel)); }
+.tasks .task:nth-child(3) { background: linear-gradient(180deg, rgba(88,204,2,0.12), var(--panel)); }
+.tasks .task:nth-child(4) { background: linear-gradient(180deg, rgba(88,204,2,0.10), var(--panel)); }
+.tasks .task:nth-child(n+5) { background: linear-gradient(180deg, rgba(88,204,2,0.06), var(--panel)); }

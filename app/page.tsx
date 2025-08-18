@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, moveTask, type Task, type Category } from '@/lib/storage';
+import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, moveTask, reorderTasks, type Task, type Category } from '@/lib/storage';
 import { getMillisUntilEndOfDay, formatCountdown } from '@/lib/time';
 import Link from 'next/link';
 import { useSettings } from './providers';
 import { getStrings } from '@/lib/i18n';
 import AddTaskModal from './components/AddTaskModal';
 import QuoteOfTheDay from './components/QuoteOfTheDay';
+import CalendarImport from './components/CalendarImport';
 
 export default function Page() {
   const { language } = useSettings();
@@ -18,6 +19,7 @@ export default function Page() {
   const [selectedCategory, setSelectedCategory] = useState<Category | ''>('');
   const [now, setNow] = useState(Date.now());
   const [showModal, setShowModal] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -35,13 +37,11 @@ export default function Page() {
   function addQuickTask() {
     const title = input.trim();
     if (!title) return;
-    if (data.tasks.length >= 5) return alert('Max 5 items for the day');
     setData(prev => upsertTask(prev, { id: crypto.randomUUID(), title, done: false, category: selectedCategory || undefined }));
     setInput('');
   }
 
   function addDetailedTask(t: Omit<Task, 'id' | 'done'>) {
-    if (data.tasks.length >= 5) return alert('Max 5 items for the day');
     setData(prev => upsertTask(prev, { id: crypto.randomUUID(), done: false, ...t }));
   }
 
@@ -53,9 +53,26 @@ export default function Page() {
     setData(prev => removeTask(prev, id));
   }
 
-  function move(id: string, dir: -1 | 1) {
-    setData(prev => moveTask(prev, id, dir));
+  function onDragStart(index: number, e: React.DragEvent) {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
   }
+
+  function onDragOver(index: number, e: React.DragEvent) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  function onDrop(index: number, e: React.DragEvent) {
+    e.preventDefault();
+    const from = dragIndex ?? parseInt(e.dataTransfer.getData('text/plain') || '-1', 10);
+    if (isNaN(from) || from === index) return;
+    setData(prev => reorderTasks(prev, from, index));
+    setDragIndex(null);
+  }
+
+  function onDragEnd() { setDragIndex(null); }
 
   const dayDate = useMemo(() => {
     const d = new Date(now);
@@ -105,12 +122,20 @@ export default function Page() {
 
         <div className="tasks" style={{ marginTop: 16 }}>
           {data.tasks.map((t, idx) => (
-            <div key={t.id} className="task">
+            <div
+              key={t.id}
+              className="task"
+              draggable
+              onDragStart={(e) => onDragStart(idx, e)}
+              onDragOver={(e) => onDragOver(idx, e)}
+              onDrop={(e) => onDrop(idx, e)}
+              onDragEnd={onDragEnd}
+            >
               <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>
                 {t.done ? '✓' : ''}
               </button>
               <div style={{ opacity: t.done ? 0.6 : 1 }}>
-                <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{t.title}</div>
+                <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
                 {(t.category || t.labels) && (
                   <div className="small muted">
                     {t.category ? categoryLabel(t.category) : ''}
@@ -119,8 +144,6 @@ export default function Page() {
                 )}
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
-                <button className="btn" onClick={() => move(t.id, -1)} disabled={idx === 0}>↑</button>
-                <button className="btn" onClick={() => move(t.id, 1)} disabled={idx === data.tasks.length - 1}>↓</button>
                 <button className="btn" onClick={() => remove(t.id)} aria-label="Delete">✕</button>
               </div>
             </div>
@@ -139,11 +162,28 @@ export default function Page() {
         <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
         <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
         <QuoteOfTheDay />
+        <CalendarImport />
       </aside>
 
       <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
     </main>
   );
+}
+
+function emojiForCategory(c?: Category) {
+  switch (c) {
+    case 'deep_work': return '🧠';
+    case 'meetings': return '📅';
+    case 'admin_email': return '📧';
+    case 'planning_review': return '🗂️';
+    case 'research_learning': return '🔎';
+    case 'writing_creative': return '✍️';
+    case 'health_fitness': return '💪';
+    case 'family_friends': return '👨‍👩‍👧‍👦';
+    case 'errands_chores': return '🧹';
+    case 'hobbies_growth': return '🌱';
+    default: return '';
+  }
 }
 
 function categoryLabel(c: Task['category']): string {

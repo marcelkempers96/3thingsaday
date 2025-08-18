@@ -3,7 +3,7 @@
 import { useSettings } from '@/app/providers';
 
 export default function FooterControls() {
-	const { theme, setTheme, language, setLanguage, font, setFont } = useSettings();
+	const { theme, setTheme, language, setLanguage, font, setFont, googleClientId, setGoogleClientId } = useSettings();
 	return (
 		<footer className="panel" style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
 			<div className="small muted">Preferences</div>
@@ -29,6 +29,10 @@ export default function FooterControls() {
 						<option value="nunito">Nunito</option>
 						<option value="inter">Inter</option>
 					</select>
+				</div>
+				<div style={{ minWidth: 260 }}>
+					<label className="small muted">Google OAuth Client ID (for Calendar)</label><br />
+					<input className="input" placeholder="xxxxxxxx.apps.googleusercontent.com" value={googleClientId ?? ''} onChange={(e) => setGoogleClientId(e.target.value)} />
 				</div>
 			</div>
 		</footer>

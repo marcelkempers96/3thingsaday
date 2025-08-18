@@ -39,7 +39,7 @@ export default function HistoryPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {categoryTotals.length === 0 ? <span className="small muted">No categories yet</span> : null}
             {categoryTotals.map(([key, n]) => (
-              <span key={key} className="badge earned"><strong>{categoryLabel(key as Task['category'])}</strong> <span className="small muted">({n})</span></span>
+              <span key={key} className="badge earned"><strong>{emojiForCategory(key as Task['category'])} {categoryLabel(key as Task['category'])}</strong> <span className="small muted">({n})</span></span>
             ))}
           </div>
         </div>
@@ -55,7 +55,7 @@ export default function HistoryPage() {
                 {data.tasks.map(t => (
                   <div key={t.id} className="task" style={{ gridTemplateColumns: '1fr auto' }}>
                     <div style={{ opacity: t.done ? 0.6 : 1 }}>
-                      <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{t.title}</div>
+                      <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
                       {(t.category || t.labels) && (
                         <div className="small muted">
                           {t.category ? categoryLabel(t.category) : ''}
@@ -74,6 +74,22 @@ export default function HistoryPage() {
       </section>
     </main>
   );
+}
+
+function emojiForCategory(c?: Task['category']) {
+  switch (c) {
+    case 'deep_work': return '🧠';
+    case 'meetings': return '📅';
+    case 'admin_email': return '📧';
+    case 'planning_review': return '🗂️';
+    case 'research_learning': return '🔎';
+    case 'writing_creative': return '✍️';
+    case 'health_fitness': return '💪';
+    case 'family_friends': return '👨‍👩‍👧‍👦';
+    case 'errands_chores': return '🧹';
+    case 'hobbies_growth': return '🌱';
+    default: return '';
+  }
 }
 
 function categoryLabel(c: Task['category']): string {

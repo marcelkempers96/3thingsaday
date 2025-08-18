@@ -9,6 +9,7 @@ export type SettingsContextValue = Settings & {
   setTheme: (t: Theme) => void;
   setLanguage: (l: Language) => void;
   setFont: (f: FontChoice) => void;
+  setGoogleClientId: (id: string) => void;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -29,7 +30,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     setReady(true);
   }, []);
 
-  // Apply theme class to body
   useEffect(() => {
     if (!ready) return;
     const clsLight = 'theme-light';
@@ -43,7 +43,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     ...settings,
     setTheme: (t) => setSettings(s => ({ ...s, theme: t })),
     setLanguage: (l) => setSettings(s => ({ ...s, language: l })),
-    setFont: (f) => setSettings(s => ({ ...s, font: f }))
+    setFont: (f) => setSettings(s => ({ ...s, font: f })),
+    setGoogleClientId: (id) => setSettings(s => ({ ...s, googleClientId: id }))
   }), [settings]);
 
   const fontClass = settings.font === 'nunito' ? fontNunito.className : settings.font === 'inter' ? fontInter.className : fontBaloo.className;

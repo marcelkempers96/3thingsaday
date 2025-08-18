@@ -95,3 +95,12 @@ export function moveTask(day: DailyTasks, taskId: string, direction: -1 | 1): Da
 	next.splice(newIndex, 0, item);
 	return { ...day, tasks: next };
 }
+
+export function reorderTasks(day: DailyTasks, fromIndex: number, toIndex: number): DailyTasks {
+	const next = [...day.tasks];
+	if (fromIndex < 0 || fromIndex >= next.length) return day;
+	const clampedTo = Math.max(0, Math.min(next.length - 1, toIndex));
+	const [item] = next.splice(fromIndex, 1);
+	next.splice(clampedTo, 0, item);
+	return { ...day, tasks: next };
+}
