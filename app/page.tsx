@@ -9,6 +9,7 @@ import { getStrings } from '@/lib/i18n';
 import AddTaskModal from './components/AddTaskModal';
 import QuoteOfTheDay from './components/QuoteOfTheDay';
 import CalendarImport from './components/CalendarImport';
+import EditTaskModal from './components/EditTaskModal';
 
 function formatEventTime(ev: { start?: { date?: string; dateTime?: string }, end?: { date?: string; dateTime?: string } }) {
   const start = ev.start?.dateTime || ev.start?.date;
@@ -31,6 +32,8 @@ export default function Page() {
   const [now, setNow] = useState(Date.now());
   const [showModal, setShowModal] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTask, setEditTask] = useState<Task | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -40,6 +43,12 @@ export default function Page() {
   useEffect(() => {
     saveToday(data);
   }, [data]);
+
+  useEffect(() => {
+    function onRefresh() { setData(loadToday()); }
+    window.addEventListener('focus3:refresh', onRefresh);
+    return () => window.removeEventListener('focus3:refresh', onRefresh);
+  }, []);
 
   const remaining = useMemo(() => getMillisUntilEndOfDay(now), [now]);
   const doneCount = data.tasks.filter(t => t.done).length;
@@ -84,6 +93,21 @@ export default function Page() {
   }
 
   function onDragEnd() { setDragIndex(null); }
+
+  function onEdit(t: Task) {
+    setEditTask(t);
+    setEditOpen(true);
+  }
+
+  function saveEditedTask(updated: Task) {
+    setData(prev => {
+      const idx = prev.tasks.findIndex(x => x.id === updated.id);
+      if (idx === -1) return prev;
+      const next = { ...prev, tasks: [...prev.tasks] };
+      next.tasks[idx] = updated;
+      return next;
+    });
+  }
 
   const dayDate = useMemo(() => {
     const d = new Date(now);
@@ -145,7 +169,7 @@ export default function Page() {
               <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>
                 {t.done ? '✓' : ''}
               </button>
-              <div style={{ opacity: t.done ? 0.6 : 1 }}>
+              <div style={{ opacity: t.done ? 0.6 : 1 }} onClick={() => onEdit(t)}>
                 <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
                 {(t.category || t.labels || t.startIso) && (
                   <div className="small muted">
@@ -179,6 +203,7 @@ export default function Page() {
       </aside>
 
       <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
+      <EditTaskModal open={editOpen} task={editTask} onClose={() => setEditOpen(false)} onSave={saveEditedTask} />
     </main>
   );
 }
@@ -202,7 +227,7 @@ function emojiForCategory(c?: Category) {
 function categoryLabel(c: Task['category']): string {
   switch (c) {
     case 'deep_work': return 'Deep Work / Focus';
-    case 'meetings': return 'Meetings';
+    case 'meetings': return 'Google Meetings';
     case 'admin_email': return 'Admin & Email';
     case 'planning_review': return 'Planning & Review';
     case 'research_learning': return 'Research & Learning';

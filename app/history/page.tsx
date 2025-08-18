@@ -95,7 +95,7 @@ function emojiForCategory(c?: Task['category']) {
 function categoryLabel(c: Task['category']): string {
   switch (c) {
     case 'deep_work': return 'Deep Work / Focus';
-    case 'meetings': return 'Meetings';
+    case 'meetings': return 'Google Meetings';
     case 'admin_email': return 'Admin & Email';
     case 'planning_review': return 'Planning & Review';
     case 'research_learning': return 'Research & Learning';

@@ -33,15 +33,19 @@ type EventItem = {
 	conferenceData?: unknown;
 };
 
+const DEFAULT_CLIENT_ID = '926648035624-ncv9e26jnh5rpm6tgte0jjdqul64b1j3.apps.googleusercontent.com';
+
 export default function CalendarImport() {
 	const { googleClientId } = useSettings();
+	const clientId = googleClientId || DEFAULT_CLIENT_ID;
 	const [token, setToken] = useState<string | null>(null);
+	const [accountName, setAccountName] = useState<string | null>(null);
 	const [events, setEvents] = useState<EventItem[] | null>(null);
 	const [loading, setLoading] = useState(false);
-	const disabled = !googleClientId;
+	const disabled = !clientId;
 
 	useEffect(() => {
-		if (!googleClientId) return;
+		if (!clientId) return;
 		const scriptId = 'google-identity';
 		if (document.getElementById(scriptId)) return;
 		const s = document.createElement('script');
@@ -50,20 +54,24 @@ export default function CalendarImport() {
 		s.defer = true;
 		s.id = scriptId;
 		document.head.appendChild(s);
-	}, [googleClientId]);
+	}, [clientId]);
 
 	async function signIn() {
-		if (!googleClientId) return;
+		if (!clientId) return;
 		const oauth2 = window.google?.accounts?.oauth2;
 		if (!oauth2) {
 			alert('Google SDK not loaded yet. Wait a second and try again.');
 			return;
 		}
 		const client = oauth2.initTokenClient({
-			client_id: googleClientId,
-			scope: 'https://www.googleapis.com/auth/calendar.readonly',
+			client_id: clientId,
+			scope: 'https://www.googleapis.com/auth/calendar.readonly openid https://www.googleapis.com/auth/userinfo.profile',
 			callback: (response: { access_token: string }) => {
 				setToken(response.access_token);
+				fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${response.access_token}` } })
+					.then(r => r.ok ? r.json() : null)
+					.then(info => { if (info?.name) setAccountName(info.name as string); })
+					.catch(() => {});
 			}
 		});
 		client.requestAccessToken();
@@ -117,13 +125,17 @@ export default function CalendarImport() {
 		});
 		saveToday(next);
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
+		// Notify the main page to refresh immediately
+		try { window.dispatchEvent(new Event('focus3:refresh')); } catch {}
 	}
 
 	return (
 		<section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 			<h3 style={{ marginTop: 0 }}>Google Calendar</h3>
-			<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+			<div className="small muted">Connect to google to fetch daily meetings into your task list</div>
+			<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
 				<button className="btn btn-primary" onClick={signIn}>{token ? 'Signed in' : 'Sign in to Google'}</button>
+				{token ? <span className="small" style={{ color: 'var(--accent)' }}>✓ Signed in{accountName ? ` as: ${accountName}` : ''}</span> : null}
 				<button className="btn" disabled={!token || loading} onClick={fetchTodayEvents}>{loading ? 'Loading…' : 'Fetch today\'s events'}</button>
 			</div>
 			{events && events.length > 0 && (
