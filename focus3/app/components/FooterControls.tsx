@@ -50,6 +50,13 @@ export default function FooterControls() {
 						<label className="small muted">Google OAuth Client ID</label><br />
 						<input className="input" value={googleClientId ?? ''} readOnly />
 					</div>
+					<div>
+						<label className="small muted">Sync</label><br />
+						<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+							<button className="btn" onClick={() => {/* placeholder toggle in Settings page */}}>Cross-device enabled</button>
+							<span className="small muted">Sign in to the same Google account on both devices</span>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div className="small muted">Support: <a href="mailto:marcelxingkai@hotmail.com">marcelxingkai@hotmail.com</a></div>

@@ -2,15 +2,37 @@
 
 import { useSettings } from '@/app/providers';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { loadAllDays, saveAllDays } from '@/lib/storage';
+import { loadProjects, saveProjects } from '@/lib/projects';
 
 export default function SettingsPage() {
 	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes } = useSettings();
 	const [saved, setSaved] = useState<string>('');
-	function saveAll() {
-		setSaved('Saved');
-		setTimeout(() => setSaved(''), 1500);
+	const fileRef = useRef<HTMLInputElement>(null);
+	function saveAll() { setSaved('Saved'); setTimeout(() => setSaved(''), 1500); }
+
+	function exportData() {
+		const data = { days: loadAllDays(), projects: loadProjects() };
+		const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url; a.download = 'focus3-data.json'; a.click();
+		URL.revokeObjectURL(url);
 	}
+	function importData(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]; if (!file) return;
+		file.text().then(txt => {
+			try {
+				const data = JSON.parse(txt);
+				if (data.days) saveAllDays(data.days);
+				if (data.projects) saveProjects(data.projects);
+				setSaved('Imported');
+				setTimeout(() => setSaved(''), 1500);
+			} catch { alert('Invalid file'); }
+		});
+	}
+
 	return (
 		<main className="grid" style={{ marginTop: 8 }}>
 			<section className="panel">
@@ -59,6 +81,15 @@ export default function SettingsPage() {
 					<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
 						<button className="btn btn-primary" onClick={saveAll}>Save</button>
 						{saved ? <span className="small" style={{ color: 'var(--accent)' }}>✓ {saved}</span> : null}
+					</div>
+					<hr className="hr" />
+					<div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+						<button className="btn" onClick={exportData}>Export data</button>
+						<label className="btn">
+							Import data
+							<input type="file" accept="application/json" style={{ display: 'none' }} ref={fileRef} onChange={importData} />
+						</label>
+						<div className="small muted">Use this to move your data between devices.</div>
 					</div>
 				</div>
 			</section>

@@ -16,6 +16,7 @@ export type Settings = {
   mealTimes?: { breakfast: string; lunch: string; dinner: string };
   colorScheme: ColorScheme;
   rememberGoogle: boolean;
+  rememberSync: boolean;
 };
 
 const STORAGE_KEY = 'focus3_settings_v1';
@@ -30,7 +31,8 @@ export const DEFAULT_SETTINGS: Settings = {
   customTimeHHMM: '18:00',
   mealTimes: { breakfast: '08:00', lunch: '12:30', dinner: '18:30' },
   colorScheme: 'green',
-  rememberGoogle: true
+  rememberGoogle: true,
+  rememberSync: true
 };
 
 export function loadSettings(): Settings {
@@ -43,6 +45,7 @@ export function loadSettings(): Settings {
     merged.googleClientId = merged.googleClientId || DEFAULT_SETTINGS.googleClientId;
     merged.mealTimes = { ...DEFAULT_SETTINGS.mealTimes!, ...(parsed as any).mealTimes };
     if (merged.rememberGoogle === undefined || merged.rememberGoogle === null) merged.rememberGoogle = true;
+    if (merged.rememberSync === undefined || merged.rememberSync === null) merged.rememberSync = true;
     return merged;
   } catch {
     return DEFAULT_SETTINGS;
