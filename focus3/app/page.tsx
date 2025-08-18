@@ -13,6 +13,7 @@ import CalendarImport from './components/CalendarImport';
 import EditTaskModal from './components/EditTaskModal';
 import { newId } from '@/lib/uid';
 import { loadProjects } from '@/lib/projects';
+import { supabase } from '@/lib/supabaseClient';
 
 function formatEventTime(ev: { start?: { date?: string; dateTime?: string }, end?: { date?: string; dateTime?: string } }) {
   const start = ev.start?.dateTime || ev.start?.date;
@@ -41,6 +42,8 @@ export default function Page() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const [selectedDayMode, setSelectedDayMode] = useState<'today' | 'tomorrow'>('today');
+  const [userName, setUserName] = useState<string | null>(null);
   const projects = useMemo(() => loadProjects(), []);
   const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
   
@@ -61,6 +64,14 @@ export default function Page() {
       window.removeEventListener('focus3:data', onRefresh);
       window.removeEventListener('storage', onRefresh);
     };
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user; if (!u) return;
+      const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || null;
+      setUserName(name);
+    }).catch(() => {});
   }, []);
   
   const remaining = useMemo(() => {
@@ -90,8 +101,12 @@ export default function Page() {
   function addQuickTask() {
     const title = input.trim();
     if (!title) return;
-    setData(prev => upsertTask(prev, { id: newId(), title, done: false, category: selectedCategory || undefined }));
-    setInput('');
+    if (selectedDayMode === 'today') {
+      setData(prev => upsertTask(prev, { id: newId(), title, done: false, category: selectedCategory || undefined }));
+      setInput('');
+    } else {
+      addForDay(1);
+    }
   }
   
   function addDetailedTask(t: Omit<Task, 'id' | 'done'>, dateKey?: string) {
@@ -139,6 +154,7 @@ export default function Page() {
             <div>
               <div className="small muted" style={{ marginBottom: 4 }}>{dayDate}</div>
               <h2 style={{ margin: 0 }}>{S.today}</h2>
+              {userName ? <div className="small" style={{ marginTop: 4 }}><strong>Hello! {userName}</strong> <span className="small" style={{ color: 'var(--accent)' }}>✓ Signed in</span></div> : null}
             </div>
             <div className="small muted">{S.timeLeft}: <strong>{formatCountdown(remaining)}</strong></div>
           </div>
@@ -193,11 +209,12 @@ export default function Page() {
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <span className="small muted">Add to:</span>
-            <button className="btn" onClick={() => addForDay(0)}>Today</button>
-            <button className="btn" onClick={() => addForDay(1)}>Tomorrow</button>
+            <button className={`btn ${selectedDayMode === 'today' ? 'btn-primary' : ''}`} onClick={() => setSelectedDayMode('today')}>Today</button>
+            <button className={`btn ${selectedDayMode === 'tomorrow' ? 'btn-primary' : ''}`} onClick={() => setSelectedDayMode('tomorrow')}>Tomorrow</button>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <button className="btn" onClick={() => setShowOther(true)}>Other…</button>
             </div>
+            <button className="btn btn-success" onClick={addQuickTask}>ADD</button>
             <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
           </div>
         </section>
