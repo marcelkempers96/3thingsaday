@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Category, Labels, Task } from '@/lib/storage';
+import { loadProjects, type Project } from '@/lib/projects';
 
 const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
 	{ value: 'deep_work', label: 'Deep Work / Focus' },
@@ -32,6 +33,10 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 	const [labels, setLabels] = useState<Labels>({});
 	const [projectId, setProjectId] = useState<string>('');
 	const [projectItemId, setProjectItemId] = useState<string>('');
+	const [projects, setProjects] = useState<Project[]>([]);
+
+	useEffect(() => { if (open) setProjects(loadProjects()); }, [open]);
+	const itemsForProject = useMemo(() => projects.find(p => p.id === projectId)?.items || [], [projects, projectId]);
 
 	useEffect(() => {
 		if (!open) {
@@ -56,6 +61,23 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 				<h3 style={{ marginTop: 0 }}>Add Task</h3>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
+
+					{/* Project selectors */}
+					<div>
+						<label className="small muted">Project (optional)</label>
+						<select className="input" value={projectId} onChange={(e) => { setProjectId(e.target.value); setProjectItemId(''); }}>
+							<option value="">—</option>
+							{projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+						</select>
+					</div>
+					<div>
+						<label className="small muted">Project item (optional)</label>
+						<select className="input" value={projectItemId} onChange={(e) => setProjectItemId(e.target.value)} disabled={!projectId}>
+							<option value="">—</option>
+							{itemsForProject.map(it => <option key={it.id} value={it.id}>{it.type} — {it.title}</option>)}
+						</select>
+					</div>
+
 					<div>
 						<label className="small muted">Category (optional)</label>
 						<select className="input" value={category ?? ''} onChange={(e) => setCategory((e.target.value || undefined) as any)}>
@@ -63,6 +85,7 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 							{CATEGORY_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
 						</select>
 					</div>
+
 					<div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
 						<div>
 							<label className="small muted">Urgency</label>
@@ -98,16 +121,6 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 								<option value="">—</option>
 								{DURATION.map(d => <option key={d} value={d}>{d}</option>)}
 							</select>
-						</div>
-					</div>
-					<div style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
-						<div>
-							<label className="small muted">Project ID (optional)</label>
-							<input className="input" placeholder="Paste a Project ID" value={projectId} onChange={e => setProjectId(e.target.value)} />
-						</div>
-						<div>
-							<label className="small muted">Item ID (optional)</label>
-							<input className="input" placeholder="Paste a Project Item ID" value={projectItemId} onChange={e => setProjectItemId(e.target.value)} />
 						</div>
 					</div>
 				</div>
