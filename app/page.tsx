@@ -23,7 +23,8 @@ function formatEventTime(ev: { start?: { date?: string; dateTime?: string }, end
 }
 
 export default function Page() {
-  const { language } = useSettings();
+  const settings = useSettings();
+  const { language } = settings;
   const S = getStrings(language);
 
   const [data, setData] = useState<DailyTasks>(loadToday());

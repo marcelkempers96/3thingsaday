@@ -11,11 +11,17 @@
 }
 
 /***** Color schemes *****/
+/* Color scheme variables (light) */
 .color-green { --accent: #58cc02; --accent-2: #16a34a; }
 .color-blue { --accent: #3b82f6; --accent-2: #60a5fa; }
 .color-purple { --accent: #7c5cff; --accent-2: #9b7dff; }
-.color-orange { --accent: #f59e0b; --accent-2: #fbbf24; }
+.color-orange { --accent: #fb923c; --accent-2: #fdba74; }
 .color-rose { --accent: #fb7185; --accent-2: #fda4af; }
+.color-teal { --accent: #14b8a6; --accent-2: #2dd4bf; }
+.color-cyan { --accent: #06b6d4; --accent-2: #22d3ee; }
+.color-amber { --accent: #f59e0b; --accent-2: #fbbf24; }
+.color-lime { --accent: #84cc16; --accent-2: #a3e635; }
+.color-indigo { --accent: #6366f1; --accent-2: #818cf8; }
 
 * {
   box-sizing: border-box;
@@ -272,6 +278,7 @@ select.input {
 
 .task { grid-template-columns: 28px 1fr auto; }
 
+/* Category backgrounds (light) */
 .task.cat-meetings { background: #e8f0fe; border-color: #c6dafc; }
 .task.cat-deep_work { background: #eaffea; border-color: #c9f2c9; }
 .task.cat-admin_email { background: #fff7e6; border-color: #ffe2af; }
@@ -282,3 +289,15 @@ select.input {
 .task.cat-family_friends { background: #f0f9ff; border-color: #cdefff; }
 .task.cat-errands_chores { background: #f8fafc; border-color: #e5e7eb; }
 .task.cat-hobbies_growth { background: #f0fff4; border-color: #c6f6d5; }
+
+/* Category backgrounds (dark) */
+.theme-dark .task.cat-meetings { background: rgba(96,165,250,0.14); border-color: #334155; }
+.theme-dark .task.cat-deep_work { background: rgba(34,197,94,0.16); border-color: #2a3b2f; }
+.theme-dark .task.cat-admin_email { background: rgba(245,158,11,0.18); border-color: #3a2f1d; }
+.theme-dark .task.cat-planning_review { background: rgba(167,139,250,0.16); border-color: #3b335a; }
+.theme-dark .task.cat-research_learning { background: rgba(34,211,238,0.16); border-color: #2b3a48; }
+.theme-dark .task.cat-writing_creative { background: rgba(244,63,94,0.16); border-color: #4a2b37; }
+.theme-dark .task.cat-health_fitness { background: rgba(45,212,191,0.16); border-color: #2b3c3a; }
+.theme-dark .task.cat-family_friends { background: rgba(96,165,250,0.14); border-color: #334155; }
+.theme-dark .task.cat-errands_chores { background: rgba(148,163,184,0.12); border-color: #3b4252; }
+.theme-dark .task.cat-hobbies_growth { background: rgba(132,204,22,0.16); border-color: #2e3b2a; }
