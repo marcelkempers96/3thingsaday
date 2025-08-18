@@ -1,24 +1,46 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import { safeSet } from '@/lib/safeStorage';
 
 export default function SignInPage() {
 	const [email, setEmail] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [msg, setMsg] = useState('');
+	const [remember, setRemember] = useState(true);
+
+	const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || '').replace(/\/$/, '');
+	const origin = typeof window !== 'undefined' ? window.location.origin : '';
+	const redirectTo = `${origin}${basePath || ''}/`;
+
+	useEffect(() => {
+		// If already signed in, go home
+		supabase.auth.getSession().then(({ data }) => {
+			if (data.session) {
+				window.location.href = redirectTo;
+			}
+		});
+	}, []);
+
+	function setRememberFlag(v: boolean) {
+		setRemember(v);
+		try { safeSet('focus3_remember_supabase', String(v)); } catch {}
+	}
 
 	async function signInWithEmail() {
 		setLoading(true); setMsg('');
-		const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + '/' } });
+		try { safeSet('focus3_remember_supabase', String(remember)); } catch {}
+		const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo, shouldCreateUser: true } });
 		setLoading(false);
 		setMsg(error ? error.message : 'Check your email for the login link.');
 	}
 
 	async function signInWithGoogle() {
 		setLoading(true); setMsg('');
-		const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/' } });
+		try { safeSet('focus3_remember_supabase', String(remember)); } catch {}
+		const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo, queryParams: { access_type: 'offline', prompt: 'consent' } } });
 		setLoading(false);
 		if (error) setMsg(error.message);
 	}
@@ -30,6 +52,9 @@ export default function SignInPage() {
 				<div className="small muted">Create an account to sync your Focus3 data across devices.</div>
 				<div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
 					<input className="input" placeholder="your@email.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+					<label className="small" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+						<input type="checkbox" checked={remember} onChange={(e) => setRememberFlag(e.target.checked)} /> Remember me
+					</label>
 					<button className="btn btn-primary" onClick={signInWithEmail} disabled={loading || !email}>Send magic link</button>
 					<div className="small muted" style={{ textAlign: 'center' }}>or</div>
 					<button className="btn" onClick={signInWithGoogle} disabled={loading}>Continue with Google</button>

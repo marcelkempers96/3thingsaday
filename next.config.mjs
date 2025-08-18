@@ -12,7 +12,10 @@ const nextConfig = {
 	output: 'export',
 	trailingSlash: true,
 	// Use a base path when deploying under /<repo>
-	...(basePath ? { basePath } : {})
+	...(basePath ? { basePath } : {}),
+	env: {
+		NEXT_PUBLIC_BASE_PATH: basePath
+	}
 };
 
 export default nextConfig;
