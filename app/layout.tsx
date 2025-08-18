@@ -6,11 +6,14 @@ export const metadata = {
 import './globals.css';
 import Link from 'next/link';
 import { ReactNode } from 'react';
+import { Baloo_2 } from 'next/font/google';
+
+const baloo = Baloo_2({ subsets: ['latin'], weight: ['400', '600', '700'], display: 'swap' });
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>
+      <body className={baloo.className}>
         <div className="container">
           <header className="header">
             <div className="title">
