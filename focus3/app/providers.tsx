@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Settings, Theme, Language, FontChoice, CountdownMode, ColorScheme } from '@/lib/settings';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from '@/lib/settings';
 import { fontBaloo, fontInter, fontNunito } from '@/app/fonts';
+import { supabase } from '@/lib/supabaseClient';
+import { syncPull, syncPush } from '@/lib/sync';
 
 export type SettingsContextValue = Settings & {
   setTheme: (t: Theme) => void;
@@ -47,6 +49,19 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     document.body.classList.add(`color-${settings.colorScheme}`);
     saveSettings(settings);
   }, [settings, ready]);
+
+  useEffect(() => {
+    // Pull cloud data when signed in
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (data.user) {
+        await syncPull();
+        window.dispatchEvent(new Event('focus3:refresh'));
+      }
+    }).catch(() => {});
+    // Push periodically
+    const id = setInterval(() => { syncPush().catch(() => {}); }, 20_000);
+    return () => clearInterval(id);
+  }, []);
 
   const value: SettingsContextValue = useMemo(() => ({
     ...settings,
