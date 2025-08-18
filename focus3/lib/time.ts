@@ -1,3 +1,5 @@
+import type { Settings } from './settings';
+
 export function getTodayKey(now: number = Date.now()): string {
   const d = new Date(now);
   const y = d.getFullYear();
@@ -11,6 +13,35 @@ export function getMillisUntilEndOfDay(now: number = Date.now()): number {
   const end = new Date(d);
   end.setHours(23, 59, 59, 999);
   return Math.max(0, end.getTime() - now);
+}
+
+export function getMillisUntilTarget(settings: Settings, now: number = Date.now()): number {
+  const d = new Date(now);
+  function parseHHMM(hhmm?: string) {
+    if (!hhmm) return null;
+    const [h, m] = hhmm.split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return null;
+    const t = new Date(d);
+    t.setHours(h, m, 0, 0);
+    if (t.getTime() < now) t.setDate(t.getDate() + 1); // next day if past
+    return t.getTime() - now;
+  }
+
+  switch (settings.countdownMode) {
+    case 'sleepTime':
+      return parseHHMM(settings.sleepTimeHHMM) ?? getMillisUntilEndOfDay(now);
+    case 'customTime':
+      return parseHHMM(settings.customTimeHHMM) ?? getMillisUntilEndOfDay(now);
+    case 'nextMeal':
+      const msList = [settings.mealTimes?.breakfast, settings.mealTimes?.lunch, settings.mealTimes?.dinner]
+        .map(parseHHMM)
+        .filter((x): x is number => typeof x === 'number')
+        .sort((a, b) => a - b);
+      return msList.length > 0 ? msList[0] : getMillisUntilEndOfDay(now);
+    case 'endOfDay':
+    default:
+      return getMillisUntilEndOfDay(now);
+  }
 }
 
 export function formatCountdown(ms: number): string {
