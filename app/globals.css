@@ -236,3 +236,14 @@ button {
   --border: #232642;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
+
+/* Ensure elements use variable-driven colors in both themes */
+.panel { background: var(--panel); }
+.input { background: var(--panel); color: var(--text); }
+.task { background: var(--panel); }
+.checkbox { background: var(--panel); color: var(--text); border-color: var(--border); }
+
+/* Dark theme specific tweaks */
+.theme-dark .progress { background: rgba(255,255,255,0.06); border-color: var(--border); }
+.theme-dark .nav { background: rgba(255,255,255,0.03); }
+.theme-dark .badge { background: rgba(255,255,255,0.02); }
