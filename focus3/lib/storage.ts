@@ -13,14 +13,13 @@ export type Category =
 	| 'hobbies_growth';
 
 export type Labels = {
-	// legacy
 	priority?: 'P1' | 'P2' | 'P3';
-	// new
 	urgency?: 'High' | 'Medium' | 'Low';
 	importance?: 'High' | 'Medium' | 'Low';
-	energy?: 'High' | 'Medium' | 'Low';
-	context?: 'Office' | 'Home' | 'Mobile';
+	location?: 'Office' | 'Home' | 'Mobile';
 	duration?: '15m' | '30m' | '60m' | '90m+';
+	timeFromHHMM?: string;
+	timeToHHMM?: string;
 };
 
 export type SourcePlatform = 'google' | 'teams' | 'zoom';
@@ -72,6 +71,12 @@ export function loadAllDays(): DailyTasksByDate {
 	return loadRaw();
 }
 
+export function saveAllDays(map: DailyTasksByDate) {
+	if (typeof window === 'undefined') return;
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+	try { window.dispatchEvent(new Event('focus3:data')); } catch {}
+}
+
 export function loadToday(now: number = Date.now()): DailyTasks {
 	const key = getTodayKey(now);
 	const all = loadRaw();
@@ -118,10 +123,4 @@ export function reorderTasks(day: DailyTasks, fromIndex: number, toIndex: number
 	const [item] = next.splice(fromIndex, 1);
 	next.splice(clampedTo, 0, item);
 	return { ...day, tasks: next };
-}
-
-export function saveAllDays(map: DailyTasksByDate) {
-	if (typeof window === 'undefined') return;
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-	try { window.dispatchEvent(new Event('focus3:data')); } catch {}
 }

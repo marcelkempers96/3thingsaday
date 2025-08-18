@@ -3,7 +3,7 @@
 import { useSettings } from '@/app/providers';
 
 export default function FooterControls() {
-	const { theme, setTheme, language, setLanguage, font, setFont, googleClientId, colorScheme, setColorScheme } = useSettings();
+	const { theme, setTheme, language, setLanguage, font, setFont, colorScheme, setColorScheme } = useSettings();
 	return (
 		<footer className="panel" style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
 			<div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
@@ -46,20 +46,9 @@ export default function FooterControls() {
 							<option value="inter">Inter</option>
 						</select>
 					</div>
-					<div style={{ minWidth: 260 }}>
-						<label className="small muted">Google OAuth Client ID</label><br />
-						<input className="input" value={googleClientId ?? ''} readOnly />
-					</div>
-					<div>
-						<label className="small muted">Sync</label><br />
-						<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-							<button className="btn" onClick={() => {/* placeholder toggle in Settings page */}}>Cross-device enabled</button>
-							<span className="small muted">Sign in to the same Google account on both devices</span>
-						</div>
-					</div>
 				</div>
 			</div>
-			<div className="small muted">Support: <a href="mailto:marcelxingkai@hotmail.com">marcelxingkai@hotmail.com</a></div>
+			<div className="small muted">Made with focus by Marcel Kempers</div>
 		</footer>
 	);
 }
