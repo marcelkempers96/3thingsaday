@@ -6,6 +6,7 @@ export type Settings = {
   theme: Theme;
   language: Language;
   font: FontChoice;
+  googleClientId?: string;
 };
 
 const STORAGE_KEY = 'focus3_settings_v1';
@@ -13,7 +14,8 @@ const STORAGE_KEY = 'focus3_settings_v1';
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
   language: 'en',
-  font: 'baloo'
+  font: 'baloo',
+  googleClientId: ''
 };
 
 export function loadSettings(): Settings {
