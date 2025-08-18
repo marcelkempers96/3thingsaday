@@ -24,6 +24,7 @@ export default function ResponsiveHeader() {
 				<Link className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} href="/priority-matrix" prefetch={false}>Priority Matrix</Link>
 				<Link className={pathname?.startsWith('/projects') ? 'active' : ''} href="/projects" prefetch={false}>Projects</Link>
 				<Link className={pathname?.startsWith('/calendar') ? 'active' : ''} href="/calendar" prefetch={false}>Calendar</Link>
+				<Link className={pathname?.startsWith('/sign-in') ? 'active' : ''} href="/sign-in" prefetch={false}>Sign In</Link>
 				<Link className={pathname?.startsWith('/settings') ? 'active' : ''} href="/settings" prefetch={false}>Settings</Link>
 			</nav>
 
@@ -40,6 +41,7 @@ export default function ResponsiveHeader() {
 						<Link href="/priority-matrix" prefetch={false} className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} onClick={() => setOpen(false)}>Priority Matrix</Link>
 						<Link href="/projects" prefetch={false} className={pathname?.startsWith('/projects') ? 'active' : ''} onClick={() => setOpen(false)}>Projects</Link>
 						<Link href="/calendar" prefetch={false} className={pathname?.startsWith('/calendar') ? 'active' : ''} onClick={() => setOpen(false)}>Calendar</Link>
+						<Link href="/sign-in" prefetch={false} className={pathname?.startsWith('/sign-in') ? 'active' : ''} onClick={() => setOpen(false)}>Sign In</Link>
 						<Link href="/settings" prefetch={false} className={pathname?.startsWith('/settings') ? 'active' : ''} onClick={() => setOpen(false)}>Settings</Link>
 					</div>
 				</div>
