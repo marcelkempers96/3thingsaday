@@ -64,45 +64,14 @@ export default function CalendarImport() {
 		} catch {}
 	}
 
-	useEffect(() => {
-		if (!clientId || !rememberGoogle) return;
-		function trySilent() {
-			const oauth2 = window.google?.accounts?.oauth2;
-			if (!oauth2) return;
-			const client = oauth2.initTokenClient({
-				client_id: clientId,
-				scope: 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.appdata openid https://www.googleapis.com/auth/userinfo.profile',
-				callback: (response: { access_token: string; expires_in?: number }) => {
-					setToken(response.access_token);
-					if (response.expires_in) {
-						const expiry = Date.now() + (response.expires_in - 60) * 1000;
-						try { localStorage.setItem(TOKEN_KEY, JSON.stringify({ accessToken: response.access_token, expiry })); } catch {}
-					}
-					fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${response.access_token}` } })
-						.then(r => r.ok ? r.json() : null)
-						.then(info => { if (info?.name) { setAccountName(info.name as string); try { localStorage.setItem(ACCOUNT_KEY, info.name as string); } catch {} } })
-						.catch(() => {});
-				}
-			});
-			try { client.requestAccessToken(); } catch {}
-		}
-
-		const scriptId = 'google-identity';
-		const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
-		if (existing) { setTimeout(trySilent, 200); return; }
-		const s = document.createElement('script');
-		s.src = 'https://accounts.google.com/gsi/client';
-		s.async = true;
-		s.defer = true;
-		s.id = scriptId;
-		s.onload = () => setTimeout(trySilent, 50);
-		document.head.appendChild(s);
-	}, [clientId, rememberGoogle]);
-
 	async function signIn() {
 		if (!clientId) return;
 		const oauth2 = window.google?.accounts?.oauth2;
-		if (!oauth2) { alert('Google SDK not loaded yet. Wait a second and try again.'); return; }
+		if (!oauth2) {
+			// load script lazily then retry once
+			const s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true; s.onload = () => signIn(); document.head.appendChild(s);
+			return;
+		}
 		const client = oauth2.initTokenClient({
 			client_id: clientId,
 			scope: 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.appdata openid https://www.googleapis.com/auth/userinfo.profile',
