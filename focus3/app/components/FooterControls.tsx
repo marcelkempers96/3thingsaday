@@ -24,6 +24,11 @@ export default function FooterControls() {
 							<option value="purple">Purple</option>
 							<option value="orange">Orange</option>
 							<option value="rose">Rose</option>
+							<option value="teal">Teal</option>
+							<option value="cyan">Cyan</option>
+							<option value="amber">Amber</option>
+							<option value="lime">Lime</option>
+							<option value="indigo">Indigo</option>
 						</select>
 					</div>
 					<div>

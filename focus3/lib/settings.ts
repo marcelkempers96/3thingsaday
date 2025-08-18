@@ -1,7 +1,7 @@
 export type Theme = 'light' | 'dark';
 export type Language = 'en' | 'nl';
 export type FontChoice = 'baloo' | 'nunito' | 'inter';
-export type ColorScheme = 'green' | 'blue' | 'purple' | 'orange' | 'rose';
+export type ColorScheme = 'green' | 'blue' | 'purple' | 'orange' | 'rose' | 'teal' | 'cyan' | 'amber' | 'lime' | 'indigo';
 
 export type CountdownMode = 'endOfDay' | 'sleepTime' | 'customTime' | 'nextMeal';
 
