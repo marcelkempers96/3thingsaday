@@ -13,7 +13,11 @@ export type Category =
 	| 'hobbies_growth';
 
 export type Labels = {
+	// legacy
 	priority?: 'P1' | 'P2' | 'P3';
+	// new
+	urgency?: 'High' | 'Medium' | 'Low';
+	importance?: 'High' | 'Medium' | 'Low';
 	energy?: 'High' | 'Medium' | 'Low';
 	context?: 'Office' | 'Home' | 'Mobile';
 	duration?: '15m' | '30m' | '60m' | '90m+';

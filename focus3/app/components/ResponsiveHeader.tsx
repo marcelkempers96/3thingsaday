@@ -21,6 +21,7 @@ export default function ResponsiveHeader() {
 				<Link className={pathname === '/' ? 'active' : ''} href="/" prefetch={false}>Today</Link>
 				<Link className={pathname?.startsWith('/achievements') ? 'active' : ''} href="/achievements" prefetch={false}>Achievements</Link>
 				<Link className={pathname?.startsWith('/history') ? 'active' : ''} href="/history" prefetch={false}>History</Link>
+				<Link className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} href="/priority-matrix" prefetch={false}>Priority Matrix</Link>
 			</nav>
 
 			<div className="mobile-only">
@@ -33,6 +34,7 @@ export default function ResponsiveHeader() {
 						<Link href="/" prefetch={false} className={pathname === '/' ? 'active' : ''}>Today</Link>
 						<Link href="/achievements" prefetch={false} className={pathname?.startsWith('/achievements') ? 'active' : ''}>Achievements</Link>
 						<Link href="/history" prefetch={false} className={pathname?.startsWith('/history') ? 'active' : ''}>History</Link>
+						<Link href="/priority-matrix" prefetch={false} className={pathname?.startsWith('/priority-matrix') ? 'active' : ''}>Priority Matrix</Link>
 					</div>
 				</div>
 			)}

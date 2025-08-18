@@ -260,7 +260,10 @@ select.input {
 
 /* Remove gradient tint; use solid backgrounds by category */
 .tasks .task { background: var(--panel); }
-.task.badge-google::before { content: 'G'; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; background: #4285F4; color: white; font-size: 11px; margin-right: 6px; }
+/* Remove G badge icon for uniform alignment */
+.task.badge-google::before { content: none; }
+
+.task { grid-template-columns: 28px 1fr auto; }
 
 .task.cat-meetings { background: #e8f0fe; border-color: #c6dafc; }
 .task.cat-deep_work { background: #eaffea; border-color: #c9f2c9; }

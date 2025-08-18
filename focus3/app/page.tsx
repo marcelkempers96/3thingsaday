@@ -135,7 +135,7 @@ export default function Page() {
           {data.tasks.map((t, idx) => (
             <div
               key={t.id}
-              className={`task ${t.category ? `cat-${t.category}` : ''} ${t.source === 'google' ? 'badge-google' : ''}`}
+              className={`task ${t.category ? `cat-${t.category}` : ''}`}
               draggable
               onDragStart={(e) => onDragStart(idx, e)}
               onDragOver={(e) => onDragOver(idx, e)}
@@ -152,7 +152,7 @@ export default function Page() {
                     {t.category ? categoryLabel(t.category) : ''}
                     {t.startIso ? ` · ${formatEventTime({ start: { dateTime: t.startIso }, end: t.endIso ? { dateTime: t.endIso } : undefined })}` : ''}
                     {t.attendee ? ` · with ${t.attendee}` : ''}
-                    {t.labels ? ` · ${formatLabels(t.labels)}` : ''}
+                    {t.labels ? ` · ${formatLabelsModern(t.labels)}` : ''}
                   </div>
                 )}
               </div>
@@ -221,5 +221,20 @@ function formatLabels(l: NonNullable<Task['labels']>): string {
   if (l.energy) parts.push(l.energy);
   if (l.context) parts.push(l.context);
   if (l.duration) parts.push(l.duration);
+  return parts.join(' · ');
+}
+
+function formatLabelsModern(l: NonNullable<Task['labels']>): string {
+  const parts: string[] = [];
+  if (l.urgency) parts.push(`Urgency: ${l.urgency}`);
+  if (l.importance) parts.push(`Importance: ${l.importance}`);
+  // backward-compat for old priority
+  if (l.priority) {
+    const map: Record<string, string> = { P1: 'High', P2: 'Medium', P3: 'Low' };
+    parts.push(`Urgency: ${map[l.priority] || l.priority}`);
+  }
+  if (l.energy) parts.push(`Energy: ${l.energy}`);
+  if (l.context) parts.push(`Context: ${l.context}`);
+  if (l.duration) parts.push(`Duration: ${l.duration}`);
   return parts.join(' · ');
 }
