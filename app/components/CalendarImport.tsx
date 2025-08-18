@@ -47,13 +47,35 @@ export default function CalendarImport() {
 
 	useEffect(() => {
 		if (!clientId) return;
+		function trySilent() {
+			const oauth2 = window.google?.accounts?.oauth2;
+			if (!oauth2) return;
+			const client = oauth2.initTokenClient({
+				client_id: clientId,
+				scope: 'https://www.googleapis.com/auth/calendar.readonly openid https://www.googleapis.com/auth/userinfo.profile',
+				callback: (response: { access_token: string }) => {
+					setToken(response.access_token);
+					fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${response.access_token}` } })
+						.then(r => r.ok ? r.json() : null)
+						.then(info => { if (info?.name) { setAccountName(info.name as string); try { localStorage.setItem(ACCOUNT_KEY, info.name as string); } catch {} } })
+						.catch(() => {});
+				}
+			});
+			try { client.requestAccessToken(); } catch {}
+		}
+
 		const scriptId = 'google-identity';
-		if (document.getElementById(scriptId)) return;
+		const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+		if (existing) {
+			setTimeout(trySilent, 200);
+			return;
+		}
 		const s = document.createElement('script');
 		s.src = 'https://accounts.google.com/gsi/client';
 		s.async = true;
 		s.defer = true;
 		s.id = scriptId;
+		s.onload = () => setTimeout(trySilent, 50);
 		document.head.appendChild(s);
 	}, [clientId]);
 
