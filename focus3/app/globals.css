@@ -301,3 +301,8 @@ select.input {
 .theme-dark .task.cat-family_friends { background: rgba(96,165,250,0.14); border-color: #334155; }
 .theme-dark .task.cat-errands_chores { background: rgba(148,163,184,0.12); border-color: #3b4252; }
 .theme-dark .task.cat-hobbies_growth { background: rgba(132,204,22,0.16); border-color: #2e3b2a; }
+
+.panel#mobile-menu, #mobile-menu.panel {
+	max-height: 70vh;
+	overflow: auto;
+}
