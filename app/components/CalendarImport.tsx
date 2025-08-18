@@ -122,14 +122,10 @@ export default function CalendarImport() {
 	return (
 		<section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 			<h3 style={{ marginTop: 0 }}>Google Calendar</h3>
-			{disabled ? (
-				<div className="small muted">Add your Google OAuth Client ID in Preferences to enable Calendar import.</div>
-			) : (
-				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-					<button className="btn btn-primary" onClick={signIn}>{token ? 'Signed in' : 'Sign in to Google'}</button>
-					<button className="btn" disabled={!token || loading} onClick={fetchTodayEvents}>{loading ? 'Loading…' : 'Fetch today\'s events'}</button>
-				</div>
-			)}
+			<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+				<button className="btn btn-primary" onClick={signIn}>{token ? 'Signed in' : 'Sign in to Google'}</button>
+				<button className="btn" disabled={!token || loading} onClick={fetchTodayEvents}>{loading ? 'Loading…' : 'Fetch today\'s events'}</button>
+			</div>
 			{events && events.length > 0 && (
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 					<div className="small muted">Add to tasks:</div>
