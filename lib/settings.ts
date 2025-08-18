@@ -1,6 +1,7 @@
 export type Theme = 'light' | 'dark';
 export type Language = 'en' | 'nl';
 export type FontChoice = 'baloo' | 'nunito' | 'inter';
+export type ColorScheme = 'green' | 'blue' | 'purple' | 'orange' | 'rose';
 
 export type CountdownMode = 'endOfDay' | 'sleepTime' | 'customTime' | 'nextMeal';
 
@@ -13,6 +14,7 @@ export type Settings = {
   sleepTimeHHMM?: string;
   customTimeHHMM?: string;
   mealTimes?: { breakfast: string; lunch: string; dinner: string };
+  colorScheme: ColorScheme;
 };
 
 const STORAGE_KEY = 'focus3_settings_v1';
@@ -25,7 +27,8 @@ export const DEFAULT_SETTINGS: Settings = {
   countdownMode: 'endOfDay',
   sleepTimeHHMM: '23:00',
   customTimeHHMM: '18:00',
-  mealTimes: { breakfast: '08:00', lunch: '12:30', dinner: '18:30' }
+  mealTimes: { breakfast: '08:00', lunch: '12:30', dinner: '18:30' },
+  colorScheme: 'green'
 };
 
 export function loadSettings(): Settings {
@@ -36,8 +39,8 @@ export function loadSettings(): Settings {
     const parsed = JSON.parse(raw) as Settings;
     const merged: Settings = { ...DEFAULT_SETTINGS, ...parsed };
     if (!merged.googleClientId) merged.googleClientId = DEFAULT_SETTINGS.googleClientId;
-    // fill nested
     merged.mealTimes = { ...DEFAULT_SETTINGS.mealTimes!, ...(parsed as any).mealTimes };
+    if (!merged.colorScheme) merged.colorScheme = 'green';
     return merged;
   } catch {
     return DEFAULT_SETTINGS;
