@@ -44,6 +44,7 @@ export default function Page() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [selectedDayMode, setSelectedDayMode] = useState<'today' | 'tomorrow'>('today');
   const [userName, setUserName] = useState<string | null>(null);
+  const [isTouch, setIsTouch] = useState(false);
   const projects = useMemo(() => loadProjects(), []);
   const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
   
@@ -64,6 +65,14 @@ export default function Page() {
       window.removeEventListener('focus3:data', onRefresh);
       window.removeEventListener('storage', onRefresh);
     };
+  }, []);
+
+  useEffect(() => {
+    try {
+      const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      const touch = (navigator as any)?.maxTouchPoints > 0;
+      setIsTouch(Boolean(coarse || touch));
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -162,7 +171,7 @@ export default function Page() {
 
           <div className="tasks" style={{ marginTop: 16 }}>
             {data.tasks.map((t, idx) => (
-              <div key={t.id} className={`task ${t.category ? `cat-${t.category}` : ''}`} draggable onDragStart={(e) => onDragStart(idx, e)} onDragOver={(e) => onDragOver(idx, e)} onDrop={(e) => onDrop(idx, e)} onDragEnd={onDragEnd}>
+              <div key={t.id} className={`task ${t.category ? `cat-${t.category}` : ''}`} draggable={!isTouch} onDragStart={(e) => onDragStart(idx, e)} onDragOver={(e) => onDragOver(idx, e)} onDrop={(e) => onDrop(idx, e)} onDragEnd={onDragEnd}>
                 <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>{t.done ? '✓' : ''}</button>
                 <div style={{ opacity: t.done ? 0.6 : 1 }} onClick={() => onEdit(t)}>
                   <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
