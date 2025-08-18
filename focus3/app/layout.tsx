@@ -9,6 +9,10 @@ import Providers from './providers';
 import ResponsiveHeader from './components/ResponsiveHeader';
 import FooterControls from './components/FooterControls';
 
+function ErrorBoundary({ children }: { children: ReactNode }) {
+  try { return <>{children}</>; } catch (e) { return <div className="panel">Something went wrong. Please refresh.</div>; }
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
@@ -16,7 +20,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>
           <div className="container">
             <ResponsiveHeader />
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
             <FooterControls />
           </div>
         </Providers>

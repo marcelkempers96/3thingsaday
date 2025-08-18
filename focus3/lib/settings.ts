@@ -54,5 +54,5 @@ export function loadSettings(): Settings {
 
 export function saveSettings(next: Settings): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
 }
