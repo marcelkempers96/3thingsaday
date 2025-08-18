@@ -60,7 +60,19 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     }).catch(() => {});
     // Push periodically
     const id = setInterval(() => { syncPush().catch(() => {}); }, 20_000);
-    return () => clearInterval(id);
+    // Push whenever local data changes (debounced)
+    let debounceId: any = null;
+    const schedulePush = () => {
+      if (debounceId) clearTimeout(debounceId);
+      debounceId = setTimeout(() => { syncPush().catch(() => {}); }, 1200);
+    };
+    window.addEventListener('focus3:data', schedulePush);
+    window.addEventListener('focus3:projects', schedulePush);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus3:data', schedulePush);
+      window.removeEventListener('focus3:projects', schedulePush);
+    };
   }, []);
 
   const value: SettingsContextValue = useMemo(() => ({
