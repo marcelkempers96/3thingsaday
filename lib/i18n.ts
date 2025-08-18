@@ -23,6 +23,7 @@ export type Strings = {
   open: string;
   noDaysYet: string;
   tasksDoneShort: (done: number, total: number) => string;
+  quoteOfTheDay: string;
 };
 
 export const STRINGS: Record<Language, Strings> = {
@@ -48,7 +49,8 @@ export const STRINGS: Record<Language, Strings> = {
     done: 'Done',
     open: 'Open',
     noDaysYet: 'No days yet. Add tasks on the Today page.',
-    tasksDoneShort: (done, total) => `${done} / ${total} done`
+    tasksDoneShort: (done, total) => `${done} / ${total} done`,
+    quoteOfTheDay: 'Quote of the day'
   },
   nl: {
     today: 'Vandaag',
@@ -72,7 +74,8 @@ export const STRINGS: Record<Language, Strings> = {
     done: 'Klaar',
     open: 'Open',
     noDaysYet: 'Nog geen dagen. Voeg taken toe op de Vandaag-pagina.',
-    tasksDoneShort: (done, total) => `${done} / ${total} klaar`
+    tasksDoneShort: (done, total) => `${done} / ${total} klaar`,
+    quoteOfTheDay: 'Quote van de dag'
   }
 };
 
