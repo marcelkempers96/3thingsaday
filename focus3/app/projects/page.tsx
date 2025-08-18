@@ -46,7 +46,6 @@ export default function ProjectsPage() {
 								<div>
 									<strong>{p.title}</strong>
 									{p.description ? <div className="small muted">{p.description}</div> : null}
-									<div className="small muted">Project ID: {p.id}</div>
 								</div>
 								<button className="btn" onClick={() => remove(p.id)}>Delete</button>
 							</div>
@@ -62,7 +61,6 @@ export default function ProjectsPage() {
 										<div>
 											<div>{it.title}</div>
 											<div className="small muted">{it.type} · {it.dateIso || 'no date'}</div>
-											<div className="small muted">Item ID: {it.id}</div>
 										</div>
 										{/* Could add remove/edit per item later */}
 									</div>
