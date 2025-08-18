@@ -61,19 +61,15 @@ function loadRaw(): DailyTasksByDate {
 
 function saveRaw(map: DailyTasksByDate) {
 	if (typeof window === 'undefined') return;
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-	try {
-		window.dispatchEvent(new Event('focus3:data'));
-	} catch {}
+	try { localStorage.setItem(STORAGE_KEY, JSON.stringify(map)); } catch {}
+	try { window.dispatchEvent(new Event('focus3:data')); } catch {}
 }
 
-export function loadAllDays(): DailyTasksByDate {
-	return loadRaw();
-}
+export function loadAllDays(): DailyTasksByDate { return loadRaw(); }
 
 export function saveAllDays(map: DailyTasksByDate) {
 	if (typeof window === 'undefined') return;
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+	try { localStorage.setItem(STORAGE_KEY, JSON.stringify(map)); } catch {}
 	try { window.dispatchEvent(new Event('focus3:data')); } catch {}
 }
 

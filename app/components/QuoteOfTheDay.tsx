@@ -28,10 +28,7 @@ export default function QuoteOfTheDay() {
 		try {
 			const raw = localStorage.getItem(STORAGE_KEY);
 			const map = raw ? (JSON.parse(raw) as Record<string, Quote>) : {};
-			if (map[key]) {
-				setQuote(map[key]);
-				return;
-			}
+			if (map[key]) { setQuote(map[key]); return; }
 		} catch {}
 
 		let cancelled = false;
@@ -42,17 +39,10 @@ export default function QuoteOfTheDay() {
 				const data = await resp.json();
 				const first = Array.isArray(data) ? data[0] : null;
 				const q: Quote = first ? { content: first.content, author: first.author } : pickLocal();
-				if (!cancelled) {
-					setQuote(q);
-					persistQuote(q);
-				}
+				if (!cancelled) { setQuote(q); persistQuote(q); }
 			} catch (e) {
 				const q = pickLocal();
-				if (!cancelled) {
-					setQuote(q);
-					persistQuote(q);
-					setError('offline');
-				}
+				if (!cancelled) { setQuote(q); persistQuote(q); setError('offline'); }
 			}
 		})();
 		return () => { cancelled = true; };
@@ -73,9 +63,7 @@ export default function QuoteOfTheDay() {
 	);
 }
 
-function pickLocal(): Quote {
-	return LOCAL_QUOTES[Math.floor(Math.random() * LOCAL_QUOTES.length)];
-}
+function pickLocal(): Quote { return LOCAL_QUOTES[Math.floor(Math.random() * LOCAL_QUOTES.length)]; }
 
 function persistQuote(q: Quote) {
 	try {

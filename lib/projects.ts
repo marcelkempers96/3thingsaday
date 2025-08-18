@@ -22,7 +22,7 @@ export function loadProjects(): Project[] {
 
 export function saveProjects(list: Project[]) {
 	if (typeof window === 'undefined') return;
-	localStorage.setItem(KEY, JSON.stringify(list));
+	try { localStorage.setItem(KEY, JSON.stringify(list)); } catch {}
 	try { window.dispatchEvent(new Event('focus3:projects')); } catch {}
 }
 
