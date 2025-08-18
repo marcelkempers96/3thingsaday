@@ -3,11 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { loadAllDays } from '@/lib/storage';
 import { computeStreaks, computeBadges } from '@/lib/achievements';
+import { useSettings } from '@/app/providers';
+import { getStrings } from '@/lib/i18n';
 
 export default function AchievementsPage() {
+  const { language } = useSettings();
+  const S = getStrings(language);
   const [refresh, setRefresh] = useState(0);
 
-  // force re-render when coming back; lightweight approach
   useEffect(() => {
     const on = () => setRefresh(r => r + 1);
     window.addEventListener('focus', on);
@@ -28,16 +31,16 @@ export default function AchievementsPage() {
   return (
     <main className="grid" style={{ marginTop: 8 }}>
       <section className="panel">
-        <h2 style={{ marginTop: 0 }}>Achievements</h2>
+        <h2 style={{ marginTop: 0 }}>{S.achievements}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-          <Card title="Current Streak" value={`${streaks.current} 🔥`} subtitle={`${streaks.best > 0 ? `Best: ${streaks.best} days` : 'Start today!'}`} />
-          <Card title="All-time Days Logged" value={Object.keys(days).length.toString()} subtitle={`${completionRate}% days fully completed`} />
-          <Card title="Tasks Completed" value={Object.values(days).reduce((s, d) => s + d.tasks.filter(t => t.done).length, 0).toString()} subtitle="Across all days" />
+          <Card title={S.currentStreak} value={`${streaks.current} 🔥`} subtitle={`${streaks.best > 0 ? S.best(streaks.best) : S.startToday}`} />
+          <Card title={S.allTimeDays} value={Object.keys(days).length.toString()} subtitle={`${completionRate}% days fully completed`} />
+          <Card title={S.tasksCompleted} value={Object.values(days).reduce((s, d) => s + d.tasks.filter(t => t.done).length, 0).toString()} subtitle={S.acrossAllDays} />
         </div>
 
         <hr className="hr" />
 
-        <h3>Badges</h3>
+        <h3>{S.badges}</h3>
         <div className="badges">
           {badges.map(b => (
             <div key={b.id} className={`badge ${b.earned ? 'earned' : ''}`}>

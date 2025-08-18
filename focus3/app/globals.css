@@ -216,3 +216,23 @@ button {
   border-style: solid;
   background: rgba(88, 204, 2, 0.12);
 }
+
+.desktop-only { display: none; }
+.mobile-only { display: block; }
+@media (min-width: 720px) {
+  .desktop-only { display: flex; }
+  .mobile-only { display: none; }
+}
+
+/* Dark theme overrides */
+.theme-dark {
+  --bg: #0f1220;
+  --panel: #15182a;
+  --text: #e6e8f2;
+  --muted: #a2a8c3;
+  --accent: #58cc02;
+  --accent-2: #26d3a2;
+  --danger: #ff5876;
+  --border: #232642;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
