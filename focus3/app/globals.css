@@ -1,13 +1,13 @@
 :root {
-  --bg: #0f1220;
-  --panel: #15182a;
-  --text: #e6e8f2;
-  --muted: #a2a8c3;
-  --accent: #7c5cff;
-  --accent-2: #26d3a2;
-  --danger: #ff5876;
-  --border: #232642;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --bg: #f7fafc;
+  --panel: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #58cc02; /* Duolingo-like green */
+  --accent-2: #16a34a; /* deeper green */
+  --danger: #ef4444;
+  --border: #e5e7eb;
+  --shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
 }
 
 * {
@@ -17,9 +17,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: radial-gradient(1200px 800px at 20% 0%, #14172b 0%, var(--bg) 50%), var(--bg);
+  background: radial-gradient(1200px 800px at 20% 0%, #ffffff 0%, var(--bg) 60%), var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   min-height: 100%;
 }
 
@@ -50,7 +49,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.2px;
 }
 
@@ -58,10 +57,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), #9b7dff);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #6be300);
   color: white;
   box-shadow: var(--shadow);
 }
@@ -69,24 +68,24 @@ button {
 .nav {
   display: flex;
   gap: 8px;
-  background: rgba(255,255,255,0.03);
+  background: #fff;
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
 }
 
 .nav a {
-  padding: 8px 14px;
+  padding: 10px 14px;
   color: var(--muted);
 }
 
 .nav a.active {
-  background: rgba(124, 92, 255, 0.15);
+  background: rgba(88, 204, 2, 0.12);
   color: var(--text);
 }
 
 .panel {
-  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 18px;
@@ -114,26 +113,27 @@ button {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0));
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   transition: transform 0.06s ease, filter 0.06s ease;
 }
 
-.btn:hover { filter: brightness(1.05); }
+.btn:hover { filter: brightness(1.03); }
 .btn:active { transform: translateY(1px); }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #9b7dff);
+  background: linear-gradient(135deg, var(--accent), #6be300);
   border-color: transparent;
+  color: #ffffff;
 }
 
 .btn-success {
-  background: linear-gradient(135deg, var(--accent-2), #58f1c2);
+  background: linear-gradient(135deg, #ffd166, #ffce4d);
   border-color: transparent;
-  color: #0c1b18;
+  color: #7a5200;
 }
 
 .input {
@@ -141,7 +141,7 @@ button {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
+  background: #ffffff;
   color: var(--text);
 }
 
@@ -159,30 +159,31 @@ button {
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255,255,255,0.02);
+  background: #ffffff;
 }
 
 .checkbox {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: rgba(255,255,255,0.03);
+  background: #fff;
+  color: var(--text);
 }
 
 .checkbox.checked {
-  background: linear-gradient(135deg, var(--accent-2), #58f1c2);
-  color: #0c1b18;
-  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent), #6be300);
+  color: #ffffff;
+  border-color: #4bb800;
 }
 
 .progress {
-  height: 8px;
-  background: rgba(255,255,255,0.06);
+  height: 10px;
+  background: #f1f5f9;
   border: 1px solid var(--border);
   border-radius: 999px;
   overflow: hidden;
@@ -191,7 +192,7 @@ button {
 .progress > span {
   display: block;
   height: 100%;
-  background: linear-gradient(135deg, var(--accent), #9b7dff);
+  background: linear-gradient(135deg, var(--accent), #6be300);
   width: 0;
 }
 
@@ -208,10 +209,10 @@ button {
   padding: 8px 10px;
   border-radius: 999px;
   border: 1px dashed var(--border);
-  background: rgba(255,255,255,0.02);
+  background: #ffffff;
 }
 
 .badge.earned {
   border-style: solid;
-  background: rgba(124, 92, 255, 0.15);
+  background: rgba(88, 204, 2, 0.12);
 }
