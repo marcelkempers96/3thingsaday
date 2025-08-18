@@ -174,6 +174,7 @@ export default function CalendarImport() {
 					))}
 				</div>
 			)}
+			<div className="small muted">To sync across devices, export your data and import on your other device (temporary method).</div>
 		</section>
 	);
 }

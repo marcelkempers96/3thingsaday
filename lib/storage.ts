@@ -119,3 +119,9 @@ export function reorderTasks(day: DailyTasks, fromIndex: number, toIndex: number
 	next.splice(clampedTo, 0, item);
 	return { ...day, tasks: next };
 }
+
+export function saveAllDays(map: DailyTasksByDate) {
+	if (typeof window === 'undefined') return;
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+	try { window.dispatchEvent(new Event('focus3:data')); } catch {}
+}
