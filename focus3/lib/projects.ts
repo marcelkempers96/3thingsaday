@@ -1,3 +1,4 @@
+import { safeGet, safeSet } from './safeStorage';
 export type ProjectItemType = 'deadline' | 'milestone' | 'deliverable' | 'goal';
 export type ProjectItem = {
 	id: string;
@@ -17,12 +18,12 @@ const KEY = 'focus3_projects_v1';
 
 export function loadProjects(): Project[] {
 	if (typeof window === 'undefined') return [];
-	try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) as Project[] : []; } catch { return []; }
+	try { const raw = safeGet(KEY); return raw ? JSON.parse(raw) as Project[] : []; } catch { return []; }
 }
 
 export function saveProjects(list: Project[]) {
 	if (typeof window === 'undefined') return;
-	try { localStorage.setItem(KEY, JSON.stringify(list)); } catch {}
+	try { safeSet(KEY, JSON.stringify(list)); } catch {}
 	try { window.dispatchEvent(new Event('focus3:projects')); } catch {}
 }
 
