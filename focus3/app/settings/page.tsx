@@ -2,9 +2,15 @@
 
 import { useSettings } from '@/app/providers';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function SettingsPage() {
 	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes } = useSettings();
+	const [saved, setSaved] = useState<string>('');
+	function saveAll() {
+		setSaved('Saved');
+		setTimeout(() => setSaved(''), 1500);
+	}
 	return (
 		<main className="grid" style={{ marginTop: 8 }}>
 			<section className="panel">
@@ -50,6 +56,10 @@ export default function SettingsPage() {
 							</div>
 						</div>
 					) : null}
+					<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+						<button className="btn btn-primary" onClick={saveAll}>Save</button>
+						{saved ? <span className="small" style={{ color: 'var(--accent)' }}>✓ {saved}</span> : null}
+					</div>
 				</div>
 			</section>
 		</main>

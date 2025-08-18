@@ -34,6 +34,7 @@ type EventItem = {
 };
 
 const DEFAULT_CLIENT_ID = '926648035624-ncv9e26jnh5rpm6tgte0jjdqul64b1j3.apps.googleusercontent.com';
+const ACCOUNT_KEY = 'googleAccountName';
 
 export default function CalendarImport() {
 	const { googleClientId } = useSettings();
@@ -56,6 +57,13 @@ export default function CalendarImport() {
 		document.head.appendChild(s);
 	}, [clientId]);
 
+	useEffect(() => {
+		const savedAccountName = localStorage.getItem(ACCOUNT_KEY);
+		if (savedAccountName) {
+			setAccountName(savedAccountName);
+		}
+	}, []);
+
 	async function signIn() {
 		if (!clientId) return;
 		const oauth2 = window.google?.accounts?.oauth2;
@@ -70,7 +78,7 @@ export default function CalendarImport() {
 				setToken(response.access_token);
 				fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${response.access_token}` } })
 					.then(r => r.ok ? r.json() : null)
-					.then(info => { if (info?.name) setAccountName(info.name as string); })
+					.then(info => { if (info?.name) { setAccountName(info.name as string); try { localStorage.setItem(ACCOUNT_KEY, info.name as string); } catch {} } })
 					.catch(() => {});
 			}
 		});
