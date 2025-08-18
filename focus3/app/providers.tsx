@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { Settings, Theme, Language, FontChoice, CountdownMode } from '@/lib/settings';
+import type { Settings, Theme, Language, FontChoice, CountdownMode, ColorScheme } from '@/lib/settings';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from '@/lib/settings';
 import { fontBaloo, fontInter, fontNunito } from '@/app/fonts';
 
@@ -14,6 +14,7 @@ export type SettingsContextValue = Settings & {
   setSleepTime: (hhmm: string) => void;
   setCustomTime: (hhmm: string) => void;
   setMealTimes: (t: { breakfast: string; lunch: string; dinner: string }) => void;
+  setColorScheme: (c: ColorScheme) => void;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -40,6 +41,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     const clsDark = 'theme-dark';
     document.body.classList.remove(clsLight, clsDark);
     document.body.classList.add(settings.theme === 'dark' ? clsDark : clsLight);
+    // color scheme class
+    const colorClasses = ['color-green','color-blue','color-purple','color-orange','color-rose'];
+    document.body.classList.remove(...colorClasses);
+    document.body.classList.add(`color-${settings.colorScheme}`);
     saveSettings(settings);
   }, [settings, ready]);
 
@@ -52,7 +57,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     setCountdownMode: (m) => setSettings(s => ({ ...s, countdownMode: m })),
     setSleepTime: (hhmm) => setSettings(s => ({ ...s, sleepTimeHHMM: hhmm })),
     setCustomTime: (hhmm) => setSettings(s => ({ ...s, customTimeHHMM: hhmm })),
-    setMealTimes: (t) => setSettings(s => ({ ...s, mealTimes: t }))
+    setMealTimes: (t) => setSettings(s => ({ ...s, mealTimes: t })),
+    setColorScheme: (c) => setSettings(s => ({ ...s, colorScheme: c }))
   }), [settings]);
 
   const fontClass = settings.font === 'nunito' ? fontNunito.className : settings.font === 'inter' ? fontInter.className : fontBaloo.className;

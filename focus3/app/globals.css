@@ -10,6 +10,13 @@
   --shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
 }
 
+/***** Color schemes *****/
+.color-green { --accent: #58cc02; --accent-2: #16a34a; }
+.color-blue { --accent: #3b82f6; --accent-2: #60a5fa; }
+.color-purple { --accent: #7c5cff; --accent-2: #9b7dff; }
+.color-orange { --accent: #f59e0b; --accent-2: #fbbf24; }
+.color-rose { --accent: #fb7185; --accent-2: #fda4af; }
+
 * {
   box-sizing: border-box;
 }
