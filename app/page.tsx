@@ -34,6 +34,10 @@ export default function Page() {
   const [selectedCategory, setSelectedCategory] = useState<Category | ''>('');
   const [now, setNow] = useState(Date.now());
   const [showModal, setShowModal] = useState(false);
+  const [showOther, setShowOther] = useState(false);
+  const [otherDate, setOtherDate] = useState('');
+  const [otherTimeFrom, setOtherTimeFrom] = useState('');
+  const [otherTimeTo, setOtherTimeTo] = useState('');
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
@@ -90,7 +94,15 @@ export default function Page() {
     setInput('');
   }
   
-  function addDetailedTask(t: Omit<Task, 'id' | 'done'>) { setData(prev => upsertTask(prev, { id: newId(), done: false, ...t })); }
+  function addDetailedTask(t: Omit<Task, 'id' | 'done'>, dateKey?: string) {
+    if (!dateKey) { setData(prev => upsertTask(prev, { id: newId(), done: false, ...t })); return; }
+    const all = loadAllDays();
+    const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
+    const updated = upsertTask(day, { id: newId(), done: false, ...t });
+    all[dateKey] = updated; saveAllDays(all);
+    const todayKey = new Date().toISOString().slice(0,10);
+    if (dateKey === todayKey) setData(updated);
+  }
   function addForDay(offset: number) {
     const title = input.trim(); if (!title) return;
     const target = new Date(); target.setDate(target.getDate() + offset);
@@ -100,10 +112,14 @@ export default function Page() {
     const title = input.trim(); if (!title) return;
     const all = loadAllDays();
     const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
-    const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined });
+    const labels: Task['labels'] = {};
+    if (otherTimeFrom) labels.timeFromHHMM = otherTimeFrom;
+    if (otherTimeTo) labels.timeToHHMM = otherTimeTo;
+    const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined, labels: Object.keys(labels).length ? labels : undefined });
     all[dateKey] = updated; saveAllDays(all);
     if (dateKey === new Date().toISOString().slice(0,10)) setData(updated);
     setInput('');
+    setOtherDate(''); setOtherTimeFrom(''); setOtherTimeTo(''); setShowOther(false);
   }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
@@ -157,20 +173,6 @@ export default function Page() {
           </div>
         </section>
 
-        <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <h3 style={{ margin: 0 }}>Motivation</h3>
-          <p className="muted small" style={{ marginTop: 0 }}>{getStrings(language).motivation}</p>
-          <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
-          <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
-          <QuoteOfTheDay />
-        </aside>
-
-        <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <h3 style={{ margin: 0 }}>Integrations</h3>
-          <div className="small muted">Google Calendar</div>
-          <CalendarImport />
-        </aside>
-
         <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <h3 style={{ margin: 0 }}>Add tasks</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -194,11 +196,50 @@ export default function Page() {
             <button className="btn" onClick={() => addForDay(0)}>Today</button>
             <button className="btn" onClick={() => addForDay(1)}>Tomorrow</button>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <input className="input" type="date" onChange={(e) => addForDate(e.target.value)} />
+              <button className="btn" onClick={() => setShowOther(true)}>Other…</button>
             </div>
             <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
           </div>
         </section>
+
+        {showOther ? (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 60 }}>
+            <div className="panel" style={{ width: 'min(520px, 92vw)' }}>
+              <h3 style={{ marginTop: 0 }}>Add to other day</h3>
+              <div style={{ display: 'grid', gap: 8 }}>
+                <input className="input" type="date" value={otherDate} onChange={e => setOtherDate(e.target.value)} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div>
+                    <label className="small muted">Time from (optional)</label>
+                    <input className="input" type="time" value={otherTimeFrom} onChange={e => setOtherTimeFrom(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="small muted">Time to (optional)</label>
+                    <input className="input" type="time" value={otherTimeTo} onChange={e => setOtherTimeTo(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+                <button className="btn" onClick={() => { setShowOther(false); setOtherDate(''); setOtherTimeFrom(''); setOtherTimeTo(''); }}>Cancel</button>
+                <button className="btn btn-primary" onClick={() => { if (otherDate) addForDate(otherDate); }}>Save</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h3 style={{ margin: 0 }}>Motivation</h3>
+          <p className="muted small" style={{ marginTop: 0 }}>{getStrings(language).motivation}</p>
+          <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
+          <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
+          <QuoteOfTheDay />
+        </aside>
+
+        <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h3 style={{ margin: 0 }}>Integrations</h3>
+          <div className="small muted">Google Calendar</div>
+          <CalendarImport />
+        </aside>
 
         <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
         <EditTaskModal open={editOpen} task={editTask} onClose={() => setEditOpen(false)} onSave={saveEditedTask} />
