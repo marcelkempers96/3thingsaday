@@ -11,6 +11,7 @@ import QuoteOfTheDay from './components/QuoteOfTheDay';
 import CalendarImport from './components/CalendarImport';
 import EditTaskModal from './components/EditTaskModal';
 import { newId } from '@/lib/uid';
+import { loadProjects } from '@/lib/projects';
 
 function formatEventTime(ev: { start?: { date?: string; dateTime?: string }, end?: { date?: string; dateTime?: string } }) {
   const start = ev.start?.dateTime || ev.start?.date;
@@ -36,6 +37,8 @@ export default function Page() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const projects = useMemo(() => loadProjects(), []);
+  const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -146,7 +149,7 @@ export default function Page() {
                     {t.startIso ? ` · ${formatEventTime({ start: { dateTime: t.startIso }, end: t.endIso ? { dateTime: t.endIso } : undefined })}` : ''}
                     {t.attendee ? ` · with ${t.attendee}` : ''}
                     {t.labels ? ` · ${formatLabelsModern(t.labels)}` : ''}
-                    {t.projectId ? ` · Project: ${t.projectId}${t.projectItemId ? ` / ${t.projectItemId}` : ''}` : ''}
+                    {t.projectId ? ` · Project: ${projectMap[t.projectId] || 'Unknown'}` : ''}
                   </div>
                 )}
               </div>

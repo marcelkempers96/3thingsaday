@@ -74,17 +74,9 @@ export default function CalendarImport() {
 		}
 		const client = oauth2.initTokenClient({
 			client_id: clientId,
-			scope: 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.appdata openid https://www.googleapis.com/auth/userinfo.profile',
+			scope: 'https://www.googleapis.com/auth/calendar.readonly',
 			callback: (response: { access_token: string; expires_in?: number }) => {
 				setToken(response.access_token);
-				if (rememberGoogle && response.expires_in) {
-					const expiry = Date.now() + (response.expires_in - 60) * 1000;
-					try { localStorage.setItem(TOKEN_KEY, JSON.stringify({ accessToken: response.access_token, expiry })); } catch {}
-				}
-				fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${response.access_token}` } })
-					.then(r => r.ok ? r.json() : null)
-					.then(info => { if (info?.name) { setAccountName(info.name as string); try { localStorage.setItem(ACCOUNT_KEY, info.name as string); } catch {} } })
-					.catch(() => {});
 			}
 		});
 		client.requestAccessToken();
@@ -121,31 +113,6 @@ export default function CalendarImport() {
 		try { window.dispatchEvent(new Event('focus3:data')); } catch {}
 	}
 
-	async function backupToDrive() {
-    if (!token) return alert('Sign in first');
-    const payload = {
-      days: (() => { try { return JSON.parse(localStorage.getItem('focus3_days_v1') || '{}'); } catch { return {}; } })(),
-      projects: (() => { try { return JSON.parse(localStorage.getItem('focus3_projects_v1') || '[]'); } catch { return []; } })()
-    };
-    const name = `focus3-${new Date().toISOString().slice(0,10)}.json`;
-    try { await driveUploadAppData(token, name, payload); alert('Backed up to Google Drive AppData'); } catch (e) { console.error(e); alert('Backup failed'); }
-  }
-
-  async function restoreFromDrive() {
-    if (!token) return alert('Sign in first');
-    try {
-      const list = await driveListAppData(token);
-      if (!list.length) { alert('No backups found'); return; }
-      // pick the last by name (date) or rely on returned order
-      const file = list[list.length - 1];
-      const data = await driveDownloadAppData(token, file.id);
-      if (data?.days) localStorage.setItem('focus3_days_v1', JSON.stringify(data.days));
-      if (data?.projects) localStorage.setItem('focus3_projects_v1', JSON.stringify(data.projects));
-      window.dispatchEvent(new Event('focus3:data'));
-      alert('Restored from Google Drive AppData');
-    } catch (e) { console.error(e); alert('Restore failed'); }
-  }
-
 	return (
 		<section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 			<h3 style={{ marginTop: 0 }}>Google Calendar</h3>
@@ -170,16 +137,7 @@ export default function CalendarImport() {
 					))}
 				</div>
 			)}
-			{token ? (
-				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-					<div className="small muted">Cloud backup (Google Drive AppData)</div>
-					<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-						<button className="btn" onClick={backupToDrive}>Backup now</button>
-						<button className="btn" onClick={restoreFromDrive}>Restore latest</button>
-					</div>
-				</div>
-			) : null}
-			<div className="small muted">To sync across devices, export your data and import on your other device (temporary method).</div>
+			<div className="small muted">Only connects when you press Sign in. No automatic sign-ins.</div>
 		</section>
 	);
 }

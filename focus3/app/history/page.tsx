@@ -5,6 +5,7 @@ import { loadAllDays, type Task } from '@/lib/storage';
 import { formatDateKeyToHuman } from '@/lib/time';
 import { useSettings } from '@/app/providers';
 import { getStrings } from '@/lib/i18n';
+import { loadProjects } from '@/lib/projects';
 
 export default function HistoryPage() {
   const { language } = useSettings();
@@ -27,6 +28,18 @@ export default function HistoryPage() {
     }
     return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
   }, [days]);
+  const projects = useMemo(() => loadProjects(), []);
+  const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
+
+  const projectTotals = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const d of Object.values(days)) {
+      for (const t of d.tasks) {
+        if (t.projectId) counts.set(t.projectId, (counts.get(t.projectId) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+  }, [days]);
 
   return (
     <main className="grid" style={{ marginTop: 8 }}>
@@ -35,11 +48,11 @@ export default function HistoryPage() {
         <input className="input" placeholder={S.searchDates} value={query} onChange={(e) => setQuery(e.target.value)} />
 
         <div className="panel" style={{ marginTop: 12 }}>
-          <div className="small muted" style={{ marginBottom: 6 }}>Category totals</div>
+          <div className="small muted" style={{ marginBottom: 6 }}>Project totals</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {categoryTotals.length === 0 ? <span className="small muted">No categories yet</span> : null}
-            {categoryTotals.map(([key, n]) => (
-              <span key={key} className="badge earned"><strong>{emojiForCategory(key as Task['category'])} {categoryLabel(key as Task['category'])}</strong> <span className="small muted">({n})</span></span>
+            {projectTotals.length === 0 ? <span className="small muted">No projects yet</span> : null}
+            {projectTotals.map(([key, n]) => (
+              <span key={key} className="badge earned"><strong>{projectMap[key] || 'Unknown project'}</strong> <span className="small muted">({n})</span></span>
             ))}
           </div>
         </div>
@@ -60,6 +73,7 @@ export default function HistoryPage() {
                         <div className="small muted">
                           {t.category ? categoryLabel(t.category) : ''}
                           {t.labels ? ` · ${formatLabels(t.labels)}` : ''}
+                          {t.projectId ? ` · Project: ${projectMap[t.projectId] || 'Unknown'}` : ''}
                         </div>
                       )}
                     </div>
