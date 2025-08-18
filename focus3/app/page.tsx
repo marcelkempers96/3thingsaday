@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, moveTask, type Task } from '@/lib/storage';
+import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, moveTask, type Task, type Category } from '@/lib/storage';
 import { getMillisUntilEndOfDay, formatCountdown } from '@/lib/time';
 import Link from 'next/link';
 import { useSettings } from './providers';
 import { getStrings } from '@/lib/i18n';
 import AddTaskModal from './components/AddTaskModal';
+import QuoteOfTheDay from './components/QuoteOfTheDay';
 
 export default function Page() {
   const { language } = useSettings();
@@ -14,6 +15,7 @@ export default function Page() {
 
   const [data, setData] = useState<DailyTasks>(loadToday());
   const [input, setInput] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | ''>('');
   const [now, setNow] = useState(Date.now());
   const [showModal, setShowModal] = useState(false);
 
@@ -34,7 +36,7 @@ export default function Page() {
     const title = input.trim();
     if (!title) return;
     if (data.tasks.length >= 5) return alert('Max 5 items for the day');
-    setData(prev => upsertTask(prev, { id: crypto.randomUUID(), title, done: false }));
+    setData(prev => upsertTask(prev, { id: crypto.randomUUID(), title, done: false, category: selectedCategory || undefined }));
     setInput('');
   }
 
@@ -81,6 +83,19 @@ export default function Page() {
             onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }}
             onChange={(e) => setInput(e.target.value)}
           />
+          <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
+            <option value="">Category</option>
+            <option value="deep_work">Deep Work / Focus</option>
+            <option value="meetings">Meetings</option>
+            <option value="admin_email">Admin & Email</option>
+            <option value="planning_review">Planning & Review</option>
+            <option value="research_learning">Research & Learning</option>
+            <option value="writing_creative">Writing / Creative</option>
+            <option value="health_fitness">Health & Fitness</option>
+            <option value="family_friends">Family & Friends</option>
+            <option value="errands_chores">Errands & Chores</option>
+            <option value="hobbies_growth">Hobbies / Personal Growth</option>
+          </select>
           <button className="btn btn-primary" onClick={addQuickTask}>{S.addButton}</button>
           <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
         </div>
@@ -123,6 +138,7 @@ export default function Page() {
         <p className="muted small" style={{ marginTop: 0 }}>{getStrings(language).motivation}</p>
         <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
         <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
+        <QuoteOfTheDay />
       </aside>
 
       <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
