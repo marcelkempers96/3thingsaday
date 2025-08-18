@@ -1,4 +1,5 @@
 import { getTodayKey } from './time';
+import { safeGet, safeSet } from './safeStorage';
 
 export type Category =
 	| 'deep_work'
@@ -50,7 +51,7 @@ const STORAGE_KEY = 'focus3_days_v1';
 function loadRaw(): DailyTasksByDate {
 	if (typeof window === 'undefined') return {};
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
+		const raw = safeGet(STORAGE_KEY);
 		if (!raw) return {};
 		const data = JSON.parse(raw) as DailyTasksByDate;
 		return data || {};
@@ -61,20 +62,14 @@ function loadRaw(): DailyTasksByDate {
 
 function saveRaw(map: DailyTasksByDate) {
 	if (typeof window === 'undefined') return;
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-		window.dispatchEvent(new Event('focus3:data'));
-	} catch {}
+	try { if (safeSet(STORAGE_KEY, JSON.stringify(map))) window.dispatchEvent(new Event('focus3:data')); } catch {}
 }
 
 export function loadAllDays(): DailyTasksByDate { return loadRaw(); }
 
 export function saveAllDays(map: DailyTasksByDate) {
 	if (typeof window === 'undefined') return;
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-		window.dispatchEvent(new Event('focus3:data'));
-	} catch {}
+	try { if (safeSet(STORAGE_KEY, JSON.stringify(map))) window.dispatchEvent(new Event('focus3:data')); } catch {}
 }
 
 export function loadToday(now: number = Date.now()): DailyTasks {
