@@ -108,14 +108,10 @@ export default function Page() {
   const progress = Math.min(100, Math.round((doneCount / Math.max(1, data.tasks.length)) * 100));
   
   function addQuickTask() {
-    const title = input.trim();
-    if (!title) return;
-    if (selectedDayMode === 'today') {
-      setData(prev => upsertTask(prev, { id: newId(), title, done: false, category: selectedCategory || undefined }));
-      setInput('');
-    } else {
-      addForDay(1);
-    }
+    const title = input.trim(); if (!title) return;
+    const d = new Date(); if (selectedDayMode === 'tomorrow') d.setDate(d.getDate() + 1);
+    const key = d.toISOString().slice(0,10);
+    addTitleToDate(key);
   }
   
   function addDetailedTask(t: Omit<Task, 'id' | 'done'>, dateKey?: string) {
@@ -130,20 +126,26 @@ export default function Page() {
   function addForDay(offset: number) {
     const title = input.trim(); if (!title) return;
     const target = new Date(); target.setDate(target.getDate() + offset);
-    addForDate(target.toISOString().slice(0,10));
+    addTitleToDate(target.toISOString().slice(0,10));
   }
   function addForDate(dateKey: string) {
     const title = input.trim(); if (!title) return;
+    // include optional times from Other popup
+    addTitleToDate(dateKey, {
+      ...(otherTimeFrom ? { timeFromHHMM: otherTimeFrom } : {}),
+      ...(otherTimeTo ? { timeToHHMM: otherTimeTo } : {})
+    });
+    setOtherDate(''); setOtherTimeFrom(''); setOtherTimeTo(''); setShowOther(false);
+  }
+  function addTitleToDate(dateKey: string, extraLabels?: NonNullable<Task['labels']>) {
+    const title = input.trim(); if (!title) return;
     const all = loadAllDays();
     const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
-    const labels: Task['labels'] = {};
-    if (otherTimeFrom) labels.timeFromHHMM = otherTimeFrom;
-    if (otherTimeTo) labels.timeToHHMM = otherTimeTo;
-    const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined, labels: Object.keys(labels).length ? labels : undefined });
+    const labels = extraLabels && Object.keys(extraLabels).length ? extraLabels : undefined;
+    const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined, labels });
     all[dateKey] = updated; saveAllDays(all);
     if (dateKey === new Date().toISOString().slice(0,10)) setData(updated);
     setInput('');
-    setOtherDate(''); setOtherTimeFrom(''); setOtherTimeTo(''); setShowOther(false);
   }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
