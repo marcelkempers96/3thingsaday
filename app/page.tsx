@@ -47,7 +47,13 @@ export default function Page() {
   useEffect(() => {
     function onRefresh() { setData(loadToday()); }
     window.addEventListener('focus3:refresh', onRefresh);
-    return () => window.removeEventListener('focus3:refresh', onRefresh);
+    window.addEventListener('focus3:data', onRefresh);
+    window.addEventListener('storage', onRefresh);
+    return () => {
+      window.removeEventListener('focus3:refresh', onRefresh);
+      window.removeEventListener('focus3:data', onRefresh);
+      window.removeEventListener('storage', onRefresh);
+    };
   }, []);
 
   const remaining = useMemo(() => getMillisUntilEndOfDay(now), [now]);
