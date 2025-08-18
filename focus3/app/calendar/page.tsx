@@ -72,15 +72,16 @@ function WeekView({ date, entries }: { date: Date; entries: Map<string, string[]
 	const start = new Date(date); start.setDate(start.getDate() - start.getDay());
 	const days: Date[] = Array.from({ length: 7 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
 	return (
-		<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
+		<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
 			{days.map(d => {
 				const key = d.toISOString().slice(0,10);
 				const list = entries.get(key) || [];
 				return (
-					<div key={key} className="panel">
-						<div className="small muted">{d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
-						<strong>{d.getDate()}</strong>
-						<ul>{list.map((l, i) => <li key={i}>{l}</li>)}</ul>
+					<div key={key} className="panel" style={{ padding: 10 }}>
+						<div className="small muted" style={{ fontSize: 11 }}>{d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
+						<strong style={{ fontSize: 14 }}>{d.getDate()}</strong>
+						<ul style={{ paddingLeft: 16 }}>{list.slice(0,3).map((l, i) => <li key={i} style={{ fontSize: 12 }}>{l}</li>)}</ul>
+						{list.length > 3 ? <div className="small muted">+{list.length-3} more</div> : null}
 					</div>
 				);
 			})}
@@ -93,16 +94,16 @@ function MonthView({ date, entries }: { date: Date; entries: Map<string, string[
 	const start = new Date(first); start.setDate(start.getDate() - ((start.getDay()+6)%7));
 	const cells: Date[] = Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
 	return (
-		<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+		<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
 			{cells.map(d => {
 				const key = d.toISOString().slice(0,10);
 				const list = entries.get(key) || [];
 				const isCurrentMonth = d.getMonth() === date.getMonth();
 				return (
-					<div key={key} className="panel" style={{ opacity: isCurrentMonth ? 1 : 0.6 }}>
-						<div className="small muted">{d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
-						<strong>{d.getDate()}</strong>
-						<ul>{list.slice(0,3).map((l, i) => <li key={i}>{l}</li>)}</ul>
+					<div key={key} className="panel" style={{ opacity: isCurrentMonth ? 1 : 0.6, padding: 8 }}>
+						<div className="small muted" style={{ fontSize: 10 }}>{d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
+						<strong style={{ fontSize: 13 }}>{d.getDate()}</strong>
+						<ul style={{ paddingLeft: 14 }}>{list.slice(0,3).map((l, i) => <li key={i} style={{ fontSize: 11 }}>{l}</li>)}</ul>
 						{list.length > 3 ? <div className="small muted">+{list.length-3} more</div> : null}
 					</div>
 				);

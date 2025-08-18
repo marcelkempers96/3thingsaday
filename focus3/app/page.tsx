@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, reorderTasks, type Task, type Category } from '@/lib/storage';
+import { loadAllDays, saveAllDays } from '@/lib/storage';
 import { formatCountdown } from '@/lib/time';
 import Link from 'next/link';
 import { useSettings } from './providers';
@@ -90,6 +91,20 @@ export default function Page() {
   }
   
   function addDetailedTask(t: Omit<Task, 'id' | 'done'>) { setData(prev => upsertTask(prev, { id: newId(), done: false, ...t })); }
+  function addForDay(offset: number) {
+    const title = input.trim(); if (!title) return;
+    const target = new Date(); target.setDate(target.getDate() + offset);
+    addForDate(target.toISOString().slice(0,10));
+  }
+  function addForDate(dateKey: string) {
+    const title = input.trim(); if (!title) return;
+    const all = loadAllDays();
+    const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
+    const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined });
+    all[dateKey] = updated; saveAllDays(all);
+    if (dateKey === new Date().toISOString().slice(0,10)) setData(updated);
+    setInput('');
+  }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
   function onDragStart(index: number, e: React.DragEvent) { setDragIndex(index); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)); }
@@ -112,27 +127,6 @@ export default function Page() {
             <div className="small muted">{S.timeLeft}: <strong>{formatCountdown(remaining)}</strong></div>
           </div>
           <hr className="hr" />
-
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }} onChange={(e) => setInput(e.target.value)} />
-            <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
-              <option value="">Category</option>
-              <option value="deep_work">Deep Work / Focus</option>
-              <option value="meetings">Meetings</option>
-              <option value="admin_email">Admin & Email</option>
-              <option value="planning_review">Planning & Review</option>
-              <option value="research_learning">Research & Learning</option>
-              <option value="writing_creative">Writing / Creative</option>
-              <option value="health_fitness">Health & Fitness</option>
-              <option value="family_friends">Family & Friends</option>
-              <option value="errands_chores">Errands & Chores</option>
-              <option value="hobbies_growth">Hobbies / Personal Growth</option>
-            </select>
-            <button className="btn btn-primary" onClick={addQuickTask}>{S.addButton}</button>
-            <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
-          </div>
-          <div className="small muted" style={{ marginTop: 8 }}>{S.aim}</div>
-          <div className="small muted" style={{ marginTop: 4 }}>Drag to reorder</div>
 
           <div className="tasks" style={{ marginTop: 16 }}>
             {data.tasks.map((t, idx) => (
@@ -176,6 +170,35 @@ export default function Page() {
           <div className="small muted">Google Calendar</div>
           <CalendarImport />
         </aside>
+
+        <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <h3 style={{ margin: 0 }}>Add tasks</h3>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }} onChange={(e) => setInput(e.target.value)} />
+            <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
+              <option value="">Category</option>
+              <option value="deep_work">Deep Work / Focus</option>
+              <option value="meetings">Meetings</option>
+              <option value="admin_email">Admin & Email</option>
+              <option value="planning_review">Planning & Review</option>
+              <option value="research_learning">Research & Learning</option>
+              <option value="writing_creative">Writing / Creative</option>
+              <option value="health_fitness">Health & Fitness</option>
+              <option value="family_friends">Family & Friends</option>
+              <option value="errands_chores">Errands & Chores</option>
+              <option value="hobbies_growth">Hobbies / Personal Growth</option>
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span className="small muted">Add to:</span>
+            <button className="btn" onClick={() => addForDay(0)}>Today</button>
+            <button className="btn" onClick={() => addForDay(1)}>Tomorrow</button>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <input className="input" type="date" onChange={(e) => addForDate(e.target.value)} />
+            </div>
+            <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
+          </div>
+        </section>
 
         <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
         <EditTaskModal open={editOpen} task={editTask} onClose={() => setEditOpen(false)} onSave={saveEditedTask} />

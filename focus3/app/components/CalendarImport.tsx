@@ -5,6 +5,7 @@ import { useSettings } from '@/app/providers';
 import { upsertTask, loadToday, saveToday } from '@/lib/storage';
 import { driveUploadAppData, driveListAppData, driveDownloadAppData } from '@/lib/drive';
 import { newId } from '@/lib/uid';
+import { safeGet, safeSet } from '@/lib/safeStorage';
 
 // Minimal gapi-free approach: Google Identity Services for OAuth2 token
 // and direct fetch to Calendar API endpoints.
@@ -49,13 +50,13 @@ export default function CalendarImport() {
 	const [events, setEvents] = useState<EventItem[] | null>(null);
 	const [loading, setLoading] = useState(false);
 
-	useEffect(() => { try { const saved = localStorage.getItem(ACCOUNT_KEY); if (saved) setAccountName(saved); } catch {} }, []);
+	useEffect(() => { try { const saved = safeGet(ACCOUNT_KEY); if (saved) setAccountName(saved); } catch {} }, []);
 	useEffect(() => { restoreTokenIfRemembered(); }, [rememberGoogle]);
 
 	function restoreTokenIfRemembered() {
 		if (!rememberGoogle) return;
 		try {
-			const raw = localStorage.getItem(TOKEN_KEY);
+			const raw = safeGet(TOKEN_KEY);
 			if (!raw) return;
 			const saved = JSON.parse(raw) as SavedToken;
 			if (saved.accessToken && saved.expiry && saved.expiry > Date.now() + 30_000) {
@@ -77,6 +78,7 @@ export default function CalendarImport() {
 			scope: 'https://www.googleapis.com/auth/calendar.readonly',
 			callback: (response: { access_token: string; expires_in?: number }) => {
 				setToken(response.access_token);
+				if (rememberGoogle && response.expires_in) { const expiry = Date.now() + (response.expires_in - 60) * 1000; try { safeSet(TOKEN_KEY, JSON.stringify({ accessToken: response.access_token, expiry })); } catch {} }
 			}
 		});
 		client.requestAccessToken();
