@@ -110,9 +110,10 @@ function categoryLabel(c: Task['category']): string {
 
 function formatLabels(l: NonNullable<Task['labels']>): string {
   const parts: string[] = [];
-  if (l.priority) parts.push(l.priority);
-  if (l.energy) parts.push(l.energy);
-  if (l.context) parts.push(l.context);
+  if (l.importance) parts.push(`Importance: ${l.importance}`);
+  if (l.urgency) parts.push(`Urgency: ${l.urgency}`);
+  if (l.location) parts.push(l.location);
   if (l.duration) parts.push(l.duration);
+  if (l.timeFromHHMM || l.timeToHHMM) parts.push(`${l.timeFromHHMM || ''}${l.timeToHHMM ? `–${l.timeToHHMM}` : ''}`);
   return parts.join(' · ');
 }

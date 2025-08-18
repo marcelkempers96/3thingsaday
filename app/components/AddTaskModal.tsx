@@ -19,8 +19,7 @@ const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
 
 const URGENCY: Labels['urgency'][] = ['High', 'Medium', 'Low'];
 const IMPORTANCE: Labels['importance'][] = ['High', 'Medium', 'Low'];
-const ENERGY: Labels['energy'][] = ['High', 'Medium', 'Low'];
-const CONTEXT: Labels['context'][] = ['Office', 'Home', 'Mobile'];
+const LOCATION: NonNullable<Labels['location']>[] = ['Office', 'Home', 'Mobile'];
 const DURATION: Labels['duration'][] = ['15m', '30m', '60m', '90m+'];
 
 export default function AddTaskModal({ open, onClose, onSave }: {
@@ -34,35 +33,36 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 	const [projectId, setProjectId] = useState<string>('');
 	const [projectItemId, setProjectItemId] = useState<string>('');
 	const [projects, setProjects] = useState<Project[]>([]);
+	const [timeFrom, setTimeFrom] = useState<string>('');
+	const [timeTo, setTimeTo] = useState<string>('');
 
 	useEffect(() => { if (open) setProjects(loadProjects()); }, [open]);
 	const itemsForProject = useMemo(() => projects.find(p => p.id === projectId)?.items || [], [projects, projectId]);
 
 	useEffect(() => {
 		if (!open) {
-			setTitle('');
-			setCategory(undefined);
-			setLabels({});
-			setProjectId('');
-			setProjectItemId('');
+			setTitle(''); setCategory(undefined); setLabels({}); setProjectId(''); setProjectItemId(''); setTimeFrom(''); setTimeTo('');
 		}
 	}, [open]);
 
 	function submit() {
 		if (!title.trim()) return;
-		onSave({ title: title.trim(), category, labels: Object.keys(labels).length ? labels : undefined, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
+		const finalLabels: Labels = { ...labels };
+		if (timeFrom) finalLabels.timeFromHHMM = timeFrom;
+		if (timeTo) finalLabels.timeToHHMM = timeTo;
+		onSave({ title: title.trim(), category, labels: Object.keys(finalLabels).length ? finalLabels : undefined, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
 		onClose();
 	}
 
 	if (!open) return null;
 	return (
 		<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 50 }}>
-			<div className="panel" style={{ width: 'min(640px, 92vw)' }}>
+			<div className="panel" style={{ width: 'min(640px, 92vw)', maxHeight: '90vh', overflow: 'auto' }}>
 				<h3 style={{ marginTop: 0 }}>Add Task</h3>
+				<div className="small muted">Importance and urgency are optional.</div>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-					{/* Project selectors */}
 					<div>
 						<label className="small muted">Project (optional)</label>
 						<select className="input" value={projectId} onChange={(e) => { setProjectId(e.target.value); setProjectItemId(''); }}>
@@ -88,13 +88,6 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 
 					<div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
 						<div>
-							<label className="small muted">Urgency</label>
-							<select className="input" value={labels.urgency ?? ''} onChange={(e) => setLabels(l => ({ ...l, urgency: (e.target.value || undefined) as any }))}>
-								<option value="">—</option>
-								{URGENCY.map(p => <option key={p} value={p}>{p}</option>)}
-							</select>
-						</div>
-						<div>
 							<label className="small muted">Importance</label>
 							<select className="input" value={labels.importance ?? ''} onChange={(e) => setLabels(l => ({ ...l, importance: (e.target.value || undefined) as any }))}>
 								<option value="">—</option>
@@ -102,17 +95,17 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 							</select>
 						</div>
 						<div>
-							<label className="small muted">Energy</label>
-							<select className="input" value={labels.energy ?? ''} onChange={(e) => setLabels(l => ({ ...l, energy: (e.target.value || undefined) as any }))}>
+							<label className="small muted">Urgency</label>
+							<select className="input" value={labels.urgency ?? ''} onChange={(e) => setLabels(l => ({ ...l, urgency: (e.target.value || undefined) as any }))}>
 								<option value="">—</option>
-								{ENERGY.map(e => <option key={e} value={e}>{e}</option>)}
+								{URGENCY.map(p => <option key={p} value={p}>{p}</option>)}
 							</select>
 						</div>
 						<div>
-							<label className="small muted">Context</label>
-							<select className="input" value={labels.context ?? ''} onChange={(e) => setLabels(l => ({ ...l, context: (e.target.value || undefined) as any }))}>
+							<label className="small muted">Location</label>
+							<select className="input" value={labels.location ?? ''} onChange={(e) => setLabels(l => ({ ...l, location: (e.target.value || undefined) as any }))}>
 								<option value="">—</option>
-								{CONTEXT.map(c => <option key={c} value={c}>{c}</option>)}
+								{LOCATION.map(e => <option key={e} value={e}>{e}</option>)}
 							</select>
 						</div>
 						<div>
@@ -123,8 +116,19 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 							</select>
 						</div>
 					</div>
+
+					<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+						<div>
+							<label className="small muted">Time from</label>
+							<input className="input" type="time" value={timeFrom} onChange={e => setTimeFrom(e.target.value)} />
+						</div>
+						<div>
+							<label className="small muted">Time to</label>
+							<input className="input" type="time" value={timeTo} onChange={e => setTimeTo(e.target.value)} />
+						</div>
+					</div>
 				</div>
-				<div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
+				<div style={{ position: 'sticky', bottom: 0, display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12, background: 'var(--panel)', paddingTop: 8 }}>
 					<button className="btn" onClick={onClose}>Cancel</button>
 					<button className="btn btn-primary" onClick={submit} disabled={!title.trim()}>Save</button>
 				</div>

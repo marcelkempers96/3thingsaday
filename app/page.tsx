@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, moveTask, reorderTasks, type Task, type Category } from '@/lib/storage';
-import { getMillisUntilEndOfDay, formatCountdown } from '@/lib/time';
+import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, reorderTasks, type Task, type Category } from '@/lib/storage';
+import { formatCountdown } from '@/lib/time';
 import Link from 'next/link';
 import { useSettings } from './providers';
 import { getStrings } from '@/lib/i18n';
@@ -41,9 +41,7 @@ export default function Page() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    saveToday(data);
-  }, [data]);
+  useEffect(() => { saveToday(data); }, [data]);
 
   useEffect(() => {
     function onRefresh() { setData(loadToday()); }
@@ -57,7 +55,29 @@ export default function Page() {
     };
   }, []);
 
-  const remaining = useMemo(() => getMillisUntilEndOfDay(now), [now]);
+  const remaining = useMemo(() => {
+    // use settings target
+    const { countdownMode, sleepTimeHHMM, customTimeHHMM, mealTimes } = settings;
+    const d = new Date(now);
+    function parseHHMM(hhmm?: string) {
+      if (!hhmm) return null;
+      const [h, m] = hhmm.split(':').map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
+      const t = new Date(d);
+      t.setHours(h, m, 0, 0);
+      if (t.getTime() < now) t.setDate(t.getDate() + 1);
+      return Math.max(0, t.getTime() - now);
+    }
+    if (countdownMode === 'sleepTime') return parseHHMM(sleepTimeHHMM) ?? 0;
+    if (countdownMode === 'customTime') return parseHHMM(customTimeHHMM) ?? 0;
+    if (countdownMode === 'nextMeal') {
+      const list = [mealTimes?.breakfast, mealTimes?.lunch, mealTimes?.dinner].map(parseHHMM).filter((x): x is number => typeof x === 'number').sort((a, b) => a - b);
+      return list[0] ?? 0;
+    }
+    // default end of day
+    const end = new Date(d); end.setHours(23,59,59,999); return Math.max(0, end.getTime() - now);
+  }, [now, settings.countdownMode, settings.sleepTimeHHMM, settings.customTimeHHMM, settings.mealTimes]);
+
   const doneCount = data.tasks.filter(t => t.done).length;
   const progress = Math.min(100, Math.round((doneCount / Math.max(1, data.tasks.length)) * 100));
 
@@ -68,58 +88,17 @@ export default function Page() {
     setInput('');
   }
 
-  function addDetailedTask(t: Omit<Task, 'id' | 'done'>) {
-    setData(prev => upsertTask(prev, { id: crypto.randomUUID(), done: false, ...t }));
-  }
-
-  function toggle(id: string) {
-    setData(prev => toggleTask(prev, id));
-  }
-
-  function remove(id: string) {
-    setData(prev => removeTask(prev, id));
-  }
-
-  function onDragStart(index: number, e: React.DragEvent) {
-    setDragIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', String(index));
-  }
-
-  function onDragOver(index: number, e: React.DragEvent) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  }
-
-  function onDrop(index: number, e: React.DragEvent) {
-    e.preventDefault();
-    const from = dragIndex ?? parseInt(e.dataTransfer.getData('text/plain') || '-1', 10);
-    if (isNaN(from) || from === index) return;
-    setData(prev => reorderTasks(prev, from, index));
-    setDragIndex(null);
-  }
-
+  function addDetailedTask(t: Omit<Task, 'id' | 'done'>) { setData(prev => upsertTask(prev, { id: crypto.randomUUID(), done: false, ...t })); }
+  function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
+  function remove(id: string) { setData(prev => removeTask(prev, id)); }
+  function onDragStart(index: number, e: React.DragEvent) { setDragIndex(index); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)); }
+  function onDragOver(index: number, e: React.DragEvent) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+  function onDrop(index: number, e: React.DragEvent) { e.preventDefault(); const from = dragIndex ?? parseInt(e.dataTransfer.getData('text/plain') || '-1', 10); if (isNaN(from) || from === index) return; setData(prev => reorderTasks(prev, from, index)); setDragIndex(null); }
   function onDragEnd() { setDragIndex(null); }
+  function onEdit(t: Task) { setEditTask(t); setEditOpen(true); }
+  function saveEditedTask(updated: Task) { setData(prev => { const idx = prev.tasks.findIndex(x => x.id === updated.id); if (idx === -1) return prev; const next = { ...prev, tasks: [...prev.tasks] }; next.tasks[idx] = updated; return next; }); }
 
-  function onEdit(t: Task) {
-    setEditTask(t);
-    setEditOpen(true);
-  }
-
-  function saveEditedTask(updated: Task) {
-    setData(prev => {
-      const idx = prev.tasks.findIndex(x => x.id === updated.id);
-      if (idx === -1) return prev;
-      const next = { ...prev, tasks: [...prev.tasks] };
-      next.tasks[idx] = updated;
-      return next;
-    });
-  }
-
-  const dayDate = useMemo(() => {
-    const d = new Date(now);
-    return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  }, [now]);
+  const dayDate = useMemo(() => new Date(now).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), [now]);
 
   return (
     <main className="grid grid-2" style={{ marginTop: 8 }}>
@@ -131,17 +110,11 @@ export default function Page() {
           </div>
           <div className="small muted">{S.timeLeft}: <strong>{formatCountdown(remaining)}</strong></div>
         </div>
+        <div className="small muted" style={{ marginTop: 4 }}>Drag to reorder</div>
         <hr className="hr" />
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <input
-            className="input"
-            placeholder={S.addPlaceholder}
-            value={input}
-            maxLength={80}
-            onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }} onChange={(e) => setInput(e.target.value)} />
           <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
             <option value="">Category</option>
             <option value="deep_work">Deep Work / Focus</option>
@@ -158,24 +131,12 @@ export default function Page() {
           <button className="btn btn-primary" onClick={addQuickTask}>{S.addButton}</button>
           <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
         </div>
-        <div className="small muted" style={{ marginTop: 8 }}>
-          {S.aim}
-        </div>
+        <div className="small muted" style={{ marginTop: 8 }}>{S.aim}</div>
 
         <div className="tasks" style={{ marginTop: 16 }}>
           {data.tasks.map((t, idx) => (
-            <div
-              key={t.id}
-              className={`task ${t.category ? `cat-${t.category}` : ''}`}
-              draggable
-              onDragStart={(e) => onDragStart(idx, e)}
-              onDragOver={(e) => onDragOver(idx, e)}
-              onDrop={(e) => onDrop(idx, e)}
-              onDragEnd={onDragEnd}
-            >
-              <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>
-                {t.done ? '✓' : ''}
-              </button>
+            <div key={t.id} className={`task ${t.category ? `cat-${t.category}` : ''}`} draggable onDragStart={(e) => onDragStart(idx, e)} onDragOver={(e) => onDragOver(idx, e)} onDrop={(e) => onDrop(idx, e)} onDragEnd={onDragEnd}>
+              <button className={`checkbox ${t.done ? 'checked' : ''}`} aria-label="Toggle" onClick={() => toggle(t.id)}>{t.done ? '✓' : ''}</button>
               <div style={{ opacity: t.done ? 0.6 : 1 }} onClick={() => onEdit(t)}>
                 <div style={{ textDecoration: t.done ? 'line-through' as const : 'none' }}>{emojiForCategory(t.category)} {t.title}</div>
                 {(t.category || t.labels || t.startIso || t.projectId) && (
@@ -207,6 +168,11 @@ export default function Page() {
         <Link href="/achievements" className="btn btn-success" prefetch={false}>{getStrings(language).viewAchievements}</Link>
         <Link href="/history" className="btn" prefetch={false}>{getStrings(language).seeHistory}</Link>
         <QuoteOfTheDay />
+      </aside>
+
+      <aside className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <h3 style={{ margin: 0 }}>Integrations</h3>
+        <div className="small muted">Google Calendar</div>
         <CalendarImport />
       </aside>
 
@@ -216,58 +182,16 @@ export default function Page() {
   );
 }
 
-function emojiForCategory(c?: Category) {
-  switch (c) {
-    case 'deep_work': return '🧠';
-    case 'meetings': return '📅';
-    case 'admin_email': return '📧';
-    case 'planning_review': return '🗂️';
-    case 'research_learning': return '🔎';
-    case 'writing_creative': return '✍️';
-    case 'health_fitness': return '💪';
-    case 'family_friends': return '👨‍👩‍👧‍👦';
-    case 'errands_chores': return '🧹';
-    case 'hobbies_growth': return '🌱';
-    default: return '';
-  }
-}
-
-function categoryLabel(c: Task['category']): string {
-  switch (c) {
-    case 'deep_work': return 'Deep Work / Focus';
-    case 'meetings': return 'Google Meetings';
-    case 'admin_email': return 'Admin & Email';
-    case 'planning_review': return 'Planning & Review';
-    case 'research_learning': return 'Research & Learning';
-    case 'writing_creative': return 'Writing / Creative';
-    case 'health_fitness': return 'Health & Fitness';
-    case 'family_friends': return 'Family & Friends';
-    case 'errands_chores': return 'Errands & Chores';
-    case 'hobbies_growth': return 'Hobbies / Personal Growth';
-    default: return '';
-  }
-}
-
-function formatLabels(l: NonNullable<Task['labels']>): string {
-  const parts: string[] = [];
-  if (l.priority) parts.push(l.priority);
-  if (l.energy) parts.push(l.energy);
-  if (l.context) parts.push(l.context);
-  if (l.duration) parts.push(l.duration);
-  return parts.join(' · ');
-}
+function emojiForCategory(c?: Category) { switch (c) { case 'deep_work': return '🧠'; case 'meetings': return '📅'; case 'admin_email': return '📧'; case 'planning_review': return '🗂️'; case 'research_learning': return '🔎'; case 'writing_creative': return '✍️'; case 'health_fitness': return '💪'; case 'family_friends': return '👨‍👩‍👧‍👦'; case 'errands_chores': return '🧹'; case 'hobbies_growth': return '🌱'; default: return ''; } }
+function categoryLabel(c: Task['category']): string { switch (c) { case 'deep_work': return 'Deep Work / Focus'; case 'meetings': return 'Google Meetings'; case 'admin_email': return 'Admin & Email'; case 'planning_review': return 'Planning & Review'; case 'research_learning': return 'Research & Learning'; case 'writing_creative': return 'Writing / Creative'; case 'health_fitness': return 'Health & Fitness'; case 'family_friends': return 'Family & Friends'; case 'errands_chores': return 'Errands & Chores'; case 'hobbies_growth': return 'Hobbies / Personal Growth'; default: return ''; } }
 
 function formatLabelsModern(l: NonNullable<Task['labels']>): string {
   const parts: string[] = [];
   if (l.urgency) parts.push(`Urgency: ${l.urgency}`);
   if (l.importance) parts.push(`Importance: ${l.importance}`);
-  // backward-compat for old priority
-  if (l.priority) {
-    const map: Record<string, string> = { P1: 'High', P2: 'Medium', P3: 'Low' };
-    parts.push(`Urgency: ${map[l.priority] || l.priority}`);
-  }
-  if (l.energy) parts.push(`Energy: ${l.energy}`);
-  if (l.context) parts.push(`Context: ${l.context}`);
+  if (l.priority) { const map: Record<string, string> = { P1: 'High', P2: 'Medium', P3: 'Low' }; parts.push(`Urgency: ${map[l.priority] || l.priority}`); }
+  if (l.location) parts.push(`Location: ${l.location}`);
   if (l.duration) parts.push(`Duration: ${l.duration}`);
+  if (l.timeFromHHMM || l.timeToHHMM) parts.push(`${l.timeFromHHMM || ''}${l.timeToHHMM ? `–${l.timeToHHMM}` : ''}`);
   return parts.join(' · ');
 }
