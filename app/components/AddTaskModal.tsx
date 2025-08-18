@@ -16,7 +16,8 @@ const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
 	{ value: 'hobbies_growth', label: 'Hobbies / Personal Growth' }
 ];
 
-const PRIORITY: Labels['priority'][] = ['P1', 'P2', 'P3'];
+const URGENCY: Labels['urgency'][] = ['High', 'Medium', 'Low'];
+const IMPORTANCE: Labels['importance'][] = ['High', 'Medium', 'Low'];
 const ENERGY: Labels['energy'][] = ['High', 'Medium', 'Low'];
 const CONTEXT: Labels['context'][] = ['Office', 'Home', 'Mobile'];
 const DURATION: Labels['duration'][] = ['15m', '30m', '60m', '90m+'];
@@ -60,10 +61,17 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 					</div>
 					<div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
 						<div>
-							<label className="small muted">Priority</label>
-							<select className="input" value={labels.priority ?? ''} onChange={(e) => setLabels(l => ({ ...l, priority: (e.target.value || undefined) as any }))}>
+							<label className="small muted">Urgency</label>
+							<select className="input" value={labels.urgency ?? ''} onChange={(e) => setLabels(l => ({ ...l, urgency: (e.target.value || undefined) as any }))}>
 								<option value="">—</option>
-								{PRIORITY.map(p => <option key={p} value={p}>{p}</option>)}
+								{URGENCY.map(p => <option key={p} value={p}>{p}</option>)}
+							</select>
+						</div>
+						<div>
+							<label className="small muted">Importance</label>
+							<select className="input" value={labels.importance ?? ''} onChange={(e) => setLabels(l => ({ ...l, importance: (e.target.value || undefined) as any }))}>
+								<option value="">—</option>
+								{IMPORTANCE.map(e => <option key={e} value={e}>{e}</option>)}
 							</select>
 						</div>
 						<div>
