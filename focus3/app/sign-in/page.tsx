@@ -16,13 +16,14 @@ export default function SignInPage() {
 	const redirectTo = `${origin}${basePath || ''}/`;
 
 	useEffect(() => {
-		// If already signed in, go home
-		supabase.auth.getSession().then(({ data }) => {
-			if (data.session) {
-				window.location.href = redirectTo;
-			}
-		});
-	}, []);
+		// If already signed in, go home (after a short tick for Safari cookie read)
+		const t = setTimeout(() => {
+			supabase.auth.getSession().then(({ data }) => {
+				if (data.session) window.location.href = redirectTo;
+			});
+		}, 50);
+		return () => clearTimeout(t);
+	}, [redirectTo]);
 
 	function setRememberFlag(v: boolean) {
 		setRemember(v);
