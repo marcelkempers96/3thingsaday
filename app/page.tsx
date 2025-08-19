@@ -226,7 +226,7 @@ export default function Page() {
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <button className="btn" onClick={() => setShowOther(true)}>Other…</button>
             </div>
-            <button className="btn btn-success" onClick={addQuickTask}>ADD</button>
+            <button className="btn btn-success" onClick={addQuickTask} onTouchEnd={(e) => { e.preventDefault(); addQuickTask(); }}>ADD</button>
             <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
           </div>
         </section>
