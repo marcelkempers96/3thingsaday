@@ -6,6 +6,7 @@ import { upsertTask, loadToday, saveToday } from '@/lib/storage';
 import { driveUploadAppData, driveListAppData, driveDownloadAppData } from '@/lib/drive';
 import { newId } from '@/lib/uid';
 import { safeGet, safeSet } from '@/lib/safeStorage';
+import { getTodayKey } from '@/lib/time';
 
 // Minimal gapi-free approach: Google Identity Services for OAuth2 token
 // and direct fetch to Calendar API endpoints.
@@ -112,8 +113,14 @@ export default function CalendarImport() {
 		const next = upsertTask(day, { id: newId(), title, done: false, category: 'meetings', source: 'google', startIso: item.start?.dateTime || item.start?.date, endIso: item.end?.dateTime || item.end?.date, attendee });
 		saveToday(next);
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
-		try { window.dispatchEvent(new Event('focus3:data')); } catch {}
-		try { window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+		try {
+			const todayKey = getTodayKey();
+			if (day.dateKey === todayKey) {
+				window.dispatchEvent(new Event('focus3:refresh'));
+			} else {
+				window.dispatchEvent(new Event('focus3:data'));
+			}
+		} catch {}
 		setTimeout(() => { try { window.dispatchEvent(new Event('focus3:refresh')); } catch {} }, 50);
 	}
 
