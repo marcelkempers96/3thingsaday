@@ -53,8 +53,10 @@ export default function EditTaskModal({ open, task, onClose, onSave }: {
 
 	function submit() {
 		if (!task) return;
-		const finalLabels: Labels = { ...labels, timeFromHHMM: timeFrom || undefined, timeToHHMM: timeTo || undefined };
-		onSave({ ...task, title: title.trim() || task.title, category, labels: finalLabels, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
+		const finalLabels: Labels = { ...labels };
+		if (timeFrom) finalLabels.timeFromHHMM = timeFrom; else delete finalLabels.timeFromHHMM;
+		if (timeTo) finalLabels.timeToHHMM = timeTo; else delete finalLabels.timeToHHMM;
+		onSave({ ...task, title: title.trim() || task.title, category, labels: Object.keys(finalLabels).length ? finalLabels : undefined, projectId: projectId || undefined, projectItemId: projectItemId || undefined });
 		onClose();
 	}
 
@@ -62,7 +64,10 @@ export default function EditTaskModal({ open, task, onClose, onSave }: {
 	return (
 		<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={onClose}>
 			<div className="panel" style={{ width: 'min(640px, 92vw)', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-				<h3 style={{ marginTop: 0 }}>Edit Task</h3>
+				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+					<h3 style={{ marginTop: 0 }}>Edit Task</h3>
+					<button className="btn btn-primary" onClick={submit}>Save</button>
+				</div>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
 					<div>

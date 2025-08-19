@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { loadAllDays } from '@/lib/storage';
+import { getTodayKey } from '@/lib/time';
 import { loadProjects } from '@/lib/projects';
 import Link from 'next/link';
 
@@ -58,7 +59,7 @@ function collectEntries(days: ReturnType<typeof loadAllDays>, projects: ReturnTy
 }
 
 function DayView({ date, entries }: { date: Date; entries: Map<string, string[]> }) {
-	const key = date.toISOString().slice(0,10);
+	const key = getTodayKey(date.getTime());
 	const list = entries.get(key) || [];
 	return (
 		<div className="panel">
@@ -69,18 +70,18 @@ function DayView({ date, entries }: { date: Date; entries: Map<string, string[]>
 }
 
 function WeekView({ date, entries }: { date: Date; entries: Map<string, string[]> }) {
-	const start = new Date(date); start.setDate(start.getDate() - start.getDay());
+	const start = new Date(date); start.setDate(start.getDate() - ((start.getDay()+6)%7));
 	const days: Date[] = Array.from({ length: 7 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
 	return (
-		<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+		<div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
 			{days.map(d => {
-				const key = d.toISOString().slice(0,10);
+				const key = getTodayKey(d.getTime());
 				const list = entries.get(key) || [];
 				return (
-					<div key={key} className="panel" style={{ padding: 10 }}>
-						<div className="small muted" style={{ fontSize: 11 }}>{d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
+					<div key={key} className="panel" style={{ padding: 10, minWidth: 140 }}>
+						<div className="small muted" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
 						<strong style={{ fontSize: 14 }}>{d.getDate()}</strong>
-						<ul style={{ paddingLeft: 16 }}>{list.slice(0,3).map((l, i) => <li key={i} style={{ fontSize: 12 }}>{l}</li>)}</ul>
+						<ul style={{ paddingLeft: 16, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{list.slice(0,3).map((l, i) => <li key={i} style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis' }}>{l}</li>)}</ul>
 						{list.length > 3 ? <div className="small muted">+{list.length-3} more</div> : null}
 					</div>
 				);
@@ -96,7 +97,7 @@ function MonthView({ date, entries }: { date: Date; entries: Map<string, string[
 	return (
 		<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
 			{cells.map(d => {
-				const key = d.toISOString().slice(0,10);
+				const key = getTodayKey(d.getTime());
 				const list = entries.get(key) || [];
 				const isCurrentMonth = d.getMonth() === date.getMonth();
 				return (
