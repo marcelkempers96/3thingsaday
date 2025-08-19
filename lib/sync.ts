@@ -35,7 +35,7 @@ function getDeviceLabel(): string {
 export async function syncPull(): Promise<boolean> {
 	const { data: { user } } = await supabase.auth.getUser();
 	if (!user) return false;
-	const { data, error } = await supabase.from(TABLE).select('payload').eq('user_id', user.id).single();
+	const { data, error } = await supabase.from(TABLE).select('payload').eq('user_id', user.id).maybeSingle();
 	if (error) return false;
 	if (!data || !data.payload) return true;
 	const payload = data.payload as CloudPayload;
@@ -58,7 +58,7 @@ export async function syncPush(): Promise<boolean> {
 		lastDevice: { id: getDeviceId(), label: getDeviceLabel() }
 	};
 	const { error } = await supabase.from(TABLE)
-		.upsert({ user_id: user.id, payload })
+		.upsert({ user_id: user.id, payload }, { onConflict: 'user_id' })
 		.select('user_id');
 	const ok = !error;
 	if (ok) {
