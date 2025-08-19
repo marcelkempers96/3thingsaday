@@ -111,6 +111,8 @@ export default function CalendarImport() {
 		const title = item.summary || 'Untitled event';
 		const attendee = (item.attendees || []).find(a => !a.organizer)?.displayName || (item.attendees || []).find(a => !a.organizer)?.email;
 		const next = upsertTask(day, { id: newId(), title, done: false, category: 'meetings', source: 'google', startIso: item.start?.dateTime || item.start?.date, endIso: item.end?.dateTime || item.end?.date, attendee });
+		// Update UI first
+		try { window.dispatchEvent(new Event('focus3:refresh')); } catch {}
 		saveToday(next);
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
 		try {

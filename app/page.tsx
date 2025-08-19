@@ -156,17 +156,25 @@ export default function Page() {
     setOtherDate(''); setOtherTimeFrom(''); setOtherTimeTo(''); setShowOther(false);
   }
   function addTitleToDate(dateKey: string, extraLabels?: NonNullable<Task['labels']>) {
-    const title = input.trim(); if (!title) return;
-    const all = loadAllDays();
-    const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
-    const labels = extraLabels && Object.keys(extraLabels).length ? extraLabels : undefined;
-    const updated = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined, labels });
-    all[dateKey] = updated; saveAllDays(all);
-    if (dateKey === getTodayKey()) flushSync(() => setData(updated));
-    setInput('');
-    setToast('Added');
-    setTimeout(() => setToast(''), 1200);
-    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+    try {
+      const title = input.trim(); if (!title) return;
+      const all = loadAllDays();
+      const day: DailyTasks = all[dateKey] || { dateKey, tasks: [] };
+      const labels = extraLabels && Object.keys(extraLabels).length ? extraLabels : undefined;
+      const nextDay = upsertTask(day, { id: newId(), title, done: false, category: selectedCategory || undefined, labels });
+      all[dateKey] = nextDay;
+      // Update UI first to avoid iOS stale state
+      if (dateKey === getTodayKey()) flushSync(() => setData(nextDay));
+      // Persist after state mutation
+      saveAllDays(all);
+      setInput('');
+      setToast('Added');
+      setTimeout(() => setToast(''), 1200);
+      try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+      try { window.dispatchEvent(new Event('focus3:data')); } catch {}
+    } catch (e) {
+      console.error('addTitleToDate failed', e);
+    }
   }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
   function remove(id: string) { setData(prev => removeTask(prev, id)); }
@@ -247,7 +255,7 @@ export default function Page() {
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 <button type="button" className="btn" onClick={() => setShowOther(true)}>Other…</button>
               </div>
-              <button type="submit" className="btn btn-success" onTouchEnd={(e) => { e.preventDefault(); addQuickTask(); }}>ADD</button>
+              <button type="submit" className="btn btn-success">ADD</button>
               <button type="button" className="btn" onClick={() => setShowModal(true)}>Add with details</button>
             </div>
           </form>
