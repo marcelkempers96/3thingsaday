@@ -41,25 +41,31 @@ export const authStorage = {
 		if (prefersPersistent()) {
 			const v = getFromLocal(key);
 			if (v !== null) return v;
+			const c = safeGet(key); if (c !== null) return c;
 			return MEMORY[key] ?? null;
 		} else {
 			const v = getFromSession(key);
 			if (v !== null) return v;
+			const c = safeGet(key); if (c !== null) return c;
 			return MEMORY[key] ?? null;
 		}
 	},
 	setItem(key: string, value: string) {
 		if (prefersPersistent()) {
 			if (!setToLocal(key, value)) { MEMORY[key] = value; }
+			try { safeSet(key, value); } catch {}
 		} else {
 			if (!setToSession(key, value)) { MEMORY[key] = value; }
+			try { safeSet(key, value); } catch {}
 		}
 	},
 	removeItem(key: string) {
 		if (prefersPersistent()) {
 			if (!removeFromLocal(key)) { delete MEMORY[key]; }
+			try { safeSet(key, ''); } catch {}
 		} else {
 			if (!removeFromSession(key)) { delete MEMORY[key]; }
+			try { safeSet(key, ''); } catch {}
 		}
 	}
 } as Storage;
