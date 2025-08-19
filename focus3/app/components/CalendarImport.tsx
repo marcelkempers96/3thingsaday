@@ -114,15 +114,16 @@ export default function CalendarImport() {
 		setEvents(prev => prev ? prev.filter(e => e.id !== item.id) : prev);
 		try { window.dispatchEvent(new Event('focus3:data')); } catch {}
 		try { window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+		setTimeout(() => { try { window.dispatchEvent(new Event('focus3:refresh')); } catch {} }, 50);
 	}
 
 	return (
 		<section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 			<h3 style={{ marginTop: 0 }}>Google Calendar</h3>
 			<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-				<button className="btn btn-primary" onClick={signIn}>{token ? 'Signed in' : 'Sign in to Google'}</button>
+				<button className="btn btn-primary" onClick={signIn} onTouchEnd={(e) => { e.preventDefault(); signIn(); }}>{token ? 'Signed in' : 'Sign in to Google'}</button>
 				{token ? <span className="small" style={{ color: 'var(--accent)' }}>✓ Signed in{accountName ? ` as: ${accountName}` : ''}</span> : null}
-				<button className="btn" disabled={!token || loading} onClick={fetchTodayEvents}>{loading ? 'Loading…' : 'Fetch today\'s events'}</button>
+				<button className="btn" disabled={!token || loading} onClick={fetchTodayEvents} onTouchEnd={(e) => { e.preventDefault(); if (!token || loading) return; fetchTodayEvents(); }}>{loading ? 'Loading…' : 'Fetch today\'s events'}</button>
 				<button className="btn" onClick={() => setRememberGoogle(!rememberGoogle)}>{rememberGoogle ? 'Remember me: On' : 'Remember me: Off'}</button>
 			</div>
 			{events && events.length > 0 && (
@@ -134,7 +135,7 @@ export default function CalendarImport() {
 								<div>📅 {ev.summary}</div>
 								<div className="small muted">{formatEventTime(ev)} {formatAttendee(ev)}</div>
 							</div>
-							<button className="btn" onClick={() => addEventAsTask(ev)}>Add</button>
+							<button className="btn" onClick={() => addEventAsTask(ev)} onTouchEnd={(e) => { e.preventDefault(); addEventAsTask(ev); }}>Add</button>
 						</div>
 					))}
 				</div>
