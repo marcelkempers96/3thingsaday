@@ -17,7 +17,7 @@ export default function ResponsiveHeader() {
 				<span>Focus3</span>
 			</div>
 
-			<nav className="nav desktop-only">
+			<nav className="nav desktop-only" role="navigation" aria-label="Main">
 				<Link className={pathname === '/' ? 'active' : ''} href="/" prefetch={false}>Today</Link>
 				<Link className={pathname?.startsWith('/achievements') ? 'active' : ''} href="/achievements" prefetch={false}>Achievements</Link>
 				<Link className={pathname?.startsWith('/history') ? 'active' : ''} href="/history" prefetch={false}>History</Link>
@@ -33,7 +33,7 @@ export default function ResponsiveHeader() {
 			</div>
 
 			{open && (
-				<div id="mobile-menu" className="panel" style={{ position: 'absolute', right: 24, top: 'calc(56px + env(safe-area-inset-top))', minWidth: 220, zIndex: 20 }} onClick={() => setOpen(false)}>
+				<div id="mobile-menu" className="panel" style={{ position: 'absolute', right: 24, top: 'calc(56px + env(safe-area-inset-top))', minWidth: 220, zIndex: 20 }} onClick={() => setOpen(false)} role="menu">
 					<div className="tasks">
 						<Link href="/" prefetch={false} className={pathname === '/' ? 'active' : ''} onClick={() => setOpen(false)}>Today</Link>
 						<Link href="/achievements" prefetch={false} className={pathname?.startsWith('/achievements') ? 'active' : ''} onClick={() => setOpen(false)}>Achievements</Link>
