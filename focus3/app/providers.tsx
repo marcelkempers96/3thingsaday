@@ -6,6 +6,8 @@ import { DEFAULT_SETTINGS, loadSettings, saveSettings } from '@/lib/settings';
 import { fontBaloo, fontInter, fontNunito } from '@/app/fonts';
 import { supabase } from '@/lib/supabaseClient';
 import { syncPull, syncPush } from '@/lib/sync';
+import { getJSON } from '@/lib/durable';
+import { safeGet, safeSet } from '@/lib/safeStorage';
 
 export type SettingsContextValue = Settings & {
   setTheme: (t: Theme) => void;
@@ -43,6 +45,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     const init = async () => {
       try { await supabase.auth.getSession(); } catch {}
       try { await syncPull(); window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+      // Rehydrate tasks from IndexedDB if local storage is empty (Safari private mode / cookie limits)
+      try {
+        const STORAGE_KEY = 'focus3_days_v1';
+        const existing = safeGet(STORAGE_KEY);
+        const idb = await getJSON<Record<string, unknown>>(STORAGE_KEY);
+        if (idb && (!existing || existing.length < 10)) {
+          safeSet(STORAGE_KEY, JSON.stringify(idb));
+          window.dispatchEvent(new Event('focus3:refresh'));
+        }
+      } catch {}
     };
     init();
   }, []);
