@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { loadAllDays, saveAllDays } from '@/lib/storage';
 import { loadProjects, saveProjects } from '@/lib/projects';
-import { getLastSyncInfo } from '@/lib/sync';
+import { getLastSyncInfo, syncPull, syncPush } from '@/lib/sync';
 
 export default function SettingsPage() {
 	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes } = useSettings();
@@ -104,6 +104,10 @@ export default function SettingsPage() {
 						<h4 style={{ margin: '8px 0' }}>Sync status</h4>
 						<div className="small muted">Last sync: {syncAt ? new Date(syncAt).toLocaleString() : '—'}</div>
 						<div className="small muted">Last device: {syncDevice ? syncDevice.label : '—'}</div>
+						<div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+							<button className="btn" onClick={async () => { await syncPull(); const { at, device } = getLastSyncInfo(); setSyncAt(at); setSyncDevice(device); }}>Sync now (pull)</button>
+							<button className="btn" onClick={async () => { await syncPush(); const { at, device } = getLastSyncInfo(); setSyncAt(at); setSyncDevice(device); }}>Sync now (push)</button>
+						</div>
 					</div>
 					<hr className="hr" />
 					<div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>

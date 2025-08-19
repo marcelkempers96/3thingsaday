@@ -44,6 +44,7 @@ export default function Page() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [selectedDayMode, setSelectedDayMode] = useState<'today' | 'tomorrow'>('today');
   const [userName, setUserName] = useState<string | null>(null);
+  const [toast, setToast] = useState<string>('');
   const [isTouch, setIsTouch] = useState(false);
   const projects = useMemo(() => loadProjects(), []);
   const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
@@ -146,6 +147,8 @@ export default function Page() {
     all[dateKey] = updated; saveAllDays(all);
     if (dateKey === getTodayKey()) setData(updated);
     setInput('');
+    setToast('Added');
+    setTimeout(() => setToast(''), 1200);
     try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
   }
   function toggle(id: string) { setData(prev => toggleTask(prev, id)); }
@@ -274,6 +277,7 @@ export default function Page() {
 
         <AddTaskModal open={showModal} onClose={() => setShowModal(false)} onSave={addDetailedTask} />
         <EditTaskModal open={editOpen} task={editTask} onClose={() => setEditOpen(false)} onSave={saveEditedTask} />
+        {toast ? (<div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--panel)', border: '1px solid var(--border)', padding: '8px 12px', borderRadius: 12, boxShadow: 'var(--shadow)' }}>{toast}</div>) : null}
       </main>
     );
   }
