@@ -44,6 +44,12 @@ button {
   font: inherit;
 }
 
+/* Improve mobile tap behavior */
+button, .btn, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 .container {
   max-width: 960px;
   margin: 0 auto;
