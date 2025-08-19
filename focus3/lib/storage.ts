@@ -1,5 +1,6 @@
 import { getTodayKey } from './time';
 import { safeGet, safeSet } from './safeStorage';
+import { setJSON } from './durable';
 
 export type Category =
 	| 'deep_work'
@@ -63,6 +64,7 @@ function loadRaw(): DailyTasksByDate {
 function saveRaw(map: DailyTasksByDate) {
 	if (typeof window === 'undefined') return;
 	try { if (safeSet(STORAGE_KEY, JSON.stringify(map))) window.dispatchEvent(new Event('focus3:data')); } catch {}
+	try { setJSON(STORAGE_KEY, map); } catch {}
 }
 
 export function loadAllDays(): DailyTasksByDate { return loadRaw(); }
@@ -70,6 +72,7 @@ export function loadAllDays(): DailyTasksByDate { return loadRaw(); }
 export function saveAllDays(map: DailyTasksByDate) {
 	if (typeof window === 'undefined') return;
 	try { if (safeSet(STORAGE_KEY, JSON.stringify(map))) window.dispatchEvent(new Event('focus3:data')); } catch {}
+	try { setJSON(STORAGE_KEY, map); } catch {}
 }
 
 export function loadToday(now: number = Date.now()): DailyTasks {
