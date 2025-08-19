@@ -203,32 +203,34 @@ export default function Page() {
 
         <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <h3 style={{ margin: 0 }}>Add tasks</h3>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onKeyDown={(e) => { if (e.key === 'Enter') addQuickTask(); }} onChange={(e) => setInput(e.target.value)} />
-            <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
-              <option value="">Category</option>
-              <option value="deep_work">Deep Work / Focus</option>
-              <option value="meetings">Meetings</option>
-              <option value="admin_email">Admin & Email</option>
-              <option value="planning_review">Planning & Review</option>
-              <option value="research_learning">Research & Learning</option>
-              <option value="writing_creative">Writing / Creative</option>
-              <option value="health_fitness">Health & Fitness</option>
-              <option value="family_friends">Family & Friends</option>
-              <option value="errands_chores">Errands & Chores</option>
-              <option value="hobbies_growth">Hobbies / Personal Growth</option>
-            </select>
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span className="small muted">Add to:</span>
-            <button className={`btn ${selectedDayMode === 'today' ? 'btn-primary' : ''}`} onClick={() => setSelectedDayMode('today')}>Today</button>
-            <button className={`btn ${selectedDayMode === 'tomorrow' ? 'btn-primary' : ''}`} onClick={() => setSelectedDayMode('tomorrow')}>Tomorrow</button>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <button className="btn" onClick={() => setShowOther(true)}>Other…</button>
+          <form onSubmit={(e) => { e.preventDefault(); addQuickTask(); }} style={{ display: 'grid', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <input className="input" placeholder={S.addPlaceholder} value={input} maxLength={80} onChange={(e) => setInput(e.target.value)} />
+              <select className="input" value={selectedCategory} onChange={(e) => setSelectedCategory((e.target.value as Category) || '')}>
+                <option value="">Category</option>
+                <option value="deep_work">Deep Work / Focus</option>
+                <option value="meetings">Meetings</option>
+                <option value="admin_email">Admin & Email</option>
+                <option value="planning_review">Planning & Review</option>
+                <option value="research_learning">Research & Learning</option>
+                <option value="writing_creative">Writing / Creative</option>
+                <option value="health_fitness">Health & Fitness</option>
+                <option value="family_friends">Family & Friends</option>
+                <option value="errands_chores">Errands & Chores</option>
+                <option value="hobbies_growth">Hobbies / Personal Growth</option>
+              </select>
             </div>
-            <button className="btn btn-success" onClick={addQuickTask} onTouchEnd={(e) => { e.preventDefault(); addQuickTask(); }}>ADD</button>
-            <button className="btn" onClick={() => setShowModal(true)}>Add with details</button>
-          </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="small muted">Add to:</span>
+              <button type="button" className={`btn ${selectedDayMode === 'today' ? 'btn-primary' : ''}`} onClick={() => setSelectedDayMode('today')}>Today</button>
+              <button type="button" className={`btn ${selectedDayMode === 'tomorrow' ? 'btn-primary' : ''}`} onClick={() => setSelectedDayMode('tomorrow')}>Tomorrow</button>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <button type="button" className="btn" onClick={() => setShowOther(true)}>Other…</button>
+              </div>
+              <button type="submit" className="btn btn-success" onTouchEnd={(e) => { e.preventDefault(); addQuickTask(); }}>ADD</button>
+              <button type="button" className="btn" onClick={() => setShowModal(true)}>Add with details</button>
+            </div>
+          </form>
         </section>
 
         {showOther ? (
