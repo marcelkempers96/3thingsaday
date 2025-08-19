@@ -2,6 +2,9 @@ import { safeGet, safeSet } from './safeStorage';
 
 const REMEMBER_KEY = 'focus3_remember_supabase';
 const MEMORY: Record<string, string | undefined> = {};
+const KEYS_TO_COOKIE: string[] = [
+  'sb-%-auth-token', // supabase v2 session key pattern
+];
 
 function prefersPersistent(): boolean {
 	const v = safeGet(REMEMBER_KEY);
@@ -53,19 +56,19 @@ export const authStorage = {
 	setItem(key: string, value: string) {
 		if (prefersPersistent()) {
 			if (!setToLocal(key, value)) { MEMORY[key] = value; }
-			try { safeSet(key, value); } catch {}
+			try { if (KEYS_TO_COOKIE.some(p => key.includes(p))) safeSet(key, value); } catch {}
 		} else {
 			if (!setToSession(key, value)) { MEMORY[key] = value; }
-			try { safeSet(key, value); } catch {}
+			try { if (KEYS_TO_COOKIE.some(p => key.includes(p))) safeSet(key, value); } catch {}
 		}
 	},
 	removeItem(key: string) {
 		if (prefersPersistent()) {
 			if (!removeFromLocal(key)) { delete MEMORY[key]; }
-			try { safeSet(key, ''); } catch {}
+			try { if (KEYS_TO_COOKIE.some(p => key.includes(p))) safeSet(key, ''); } catch {}
 		} else {
 			if (!removeFromSession(key)) { delete MEMORY[key]; }
-			try { safeSet(key, ''); } catch {}
+			try { if (KEYS_TO_COOKIE.some(p => key.includes(p))) safeSet(key, ''); } catch {}
 		}
 	}
 } as Storage;

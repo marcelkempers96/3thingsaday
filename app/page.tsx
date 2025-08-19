@@ -46,7 +46,6 @@ export default function Page() {
   const [selectedDayMode, setSelectedDayMode] = useState<'today' | 'tomorrow'>('today');
   const [userName, setUserName] = useState<string | null>(null);
   const [toast, setToast] = useState<string>('');
-  const [adding, setAdding] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
   const projects = useMemo(() => loadProjects(), []);
   const projectMap = useMemo(() => Object.fromEntries(projects.map(p => [p.id, p.title])), [projects]);
@@ -127,13 +126,10 @@ export default function Page() {
   const progress = Math.min(100, Math.round((doneCount / Math.max(1, data.tasks.length)) * 100));
   
   function addQuickTask() {
-    if (adding) return;
-    setAdding(true);
     const title = input.trim(); if (!title) return;
     const d = new Date(); if (selectedDayMode === 'tomorrow') d.setDate(d.getDate() + 1);
     const key = getTodayKey(d.getTime());
     addTitleToDate(key);
-    setTimeout(() => setAdding(false), 150);
   }
   
   function addDetailedTask(t: Omit<Task, 'id' | 'done'>, dateKey?: string) {
