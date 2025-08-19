@@ -2,14 +2,31 @@
 
 import { useSettings } from '@/app/providers';
 import Link from 'next/link';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { loadAllDays, saveAllDays } from '@/lib/storage';
 import { loadProjects, saveProjects } from '@/lib/projects';
+import { getLastSyncInfo } from '@/lib/sync';
 
 export default function SettingsPage() {
 	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes } = useSettings();
 	const [saved, setSaved] = useState<string>('');
 	const fileRef = useRef<HTMLInputElement>(null);
+	const [syncAt, setSyncAt] = useState<string | null>(null);
+	const [syncDevice, setSyncDevice] = useState<{ id: string; label: string } | null>(null);
+
+	useEffect(() => {
+		const { at, device } = getLastSyncInfo();
+		setSyncAt(at);
+		setSyncDevice(device);
+		const onLocal = () => { const { at, device } = getLastSyncInfo(); setSyncAt(at); setSyncDevice(device); };
+		window.addEventListener('focus3:data', onLocal);
+		window.addEventListener('focus3:projects', onLocal);
+		return () => {
+			window.removeEventListener('focus3:data', onLocal);
+			window.removeEventListener('focus3:projects', onLocal);
+		};
+	}, []);
+
 	function saveAll() { setSaved('Saved'); setTimeout(() => setSaved(''), 1500); }
 
 	function exportData() {
@@ -81,6 +98,12 @@ export default function SettingsPage() {
 					<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
 						<button className="btn btn-primary" onClick={saveAll}>Save</button>
 						{saved ? <span className="small" style={{ color: 'var(--accent)' }}>✓ {saved}</span> : null}
+					</div>
+					<hr className="hr" />
+					<div>
+						<h4 style={{ margin: '8px 0' }}>Sync status</h4>
+						<div className="small muted">Last sync: {syncAt ? new Date(syncAt).toLocaleString() : '—'}</div>
+						<div className="small muted">Last device: {syncDevice ? syncDevice.label : '—'}</div>
 					</div>
 					<hr className="hr" />
 					<div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
