@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { DailyTasks, loadToday, saveToday, toggleTask, upsertTask, removeTask, reorderTasks, type Task, type Category } from '@/lib/storage';
 import { loadAllDays, saveAllDays } from '@/lib/storage';
@@ -56,7 +56,11 @@ export default function Page() {
     return () => clearInterval(id);
   }, []);
   
-  useEffect(() => { saveToday(data); }, [data]);
+  const skipSaveRef = useRef(false);
+  useEffect(() => {
+    if (skipSaveRef.current) { skipSaveRef.current = false; return; }
+    saveToday(data);
+  }, [data]);
   
   useEffect(() => {
     function onRefresh() { setData(loadToday()); }
@@ -67,6 +71,18 @@ export default function Page() {
       window.removeEventListener('focus3:refresh', onRefresh);
       window.removeEventListener('focus3:data', onRefresh);
       window.removeEventListener('storage', onRefresh);
+    };
+  }, []);
+  // Ensure refresh does not immediately cause a save loop
+  useEffect(() => {
+    const markSkip = () => { skipSaveRef.current = true; };
+    window.addEventListener('focus3:refresh', markSkip);
+    window.addEventListener('focus3:data', markSkip);
+    window.addEventListener('storage', markSkip);
+    return () => {
+      window.removeEventListener('focus3:refresh', markSkip);
+      window.removeEventListener('focus3:data', markSkip);
+      window.removeEventListener('storage', markSkip);
     };
   }, []);
 
