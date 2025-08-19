@@ -6,7 +6,8 @@ function getCookie(name: string): string | null {
 
 function setCookie(name: string, value: string) {
 	if (typeof document === 'undefined') return;
-	document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+	// Persist for ~1 year to survive reloads and restarts
+	document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax; max-age=31536000`;
 }
 
 export function safeGet(key: string): string | null {

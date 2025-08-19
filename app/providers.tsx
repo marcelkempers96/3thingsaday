@@ -38,6 +38,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     setReady(true);
   }, []);
 
+  // On mount, attempt to reload session and rehydrate tasks/projects via syncPull
+  useEffect(() => {
+    const init = async () => {
+      try { await supabase.auth.getSession(); } catch {}
+      try { await syncPull(); window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+    };
+    init();
+  }, []);
+
   useEffect(() => {
     if (!ready) return;
     const clsLight = 'theme-light';
