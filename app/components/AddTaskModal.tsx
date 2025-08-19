@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Category, Labels, Task } from '@/lib/storage';
 import { loadProjects, type Project } from '@/lib/projects';
+import { getTodayKey } from '@/lib/time';
 
 const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
 	{ value: 'deep_work', label: 'Deep Work / Focus' },
@@ -55,7 +56,7 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 		let dateKey: string | undefined = undefined;
 		if (dateMode === 'tomorrow') {
 			const d = new Date(); d.setDate(d.getDate() + 1);
-			dateKey = d.toISOString().slice(0, 10);
+			dateKey = getTodayKey(d.getTime());
 		} else if (dateMode === 'other') {
 			if (!otherDate) return; // require date when choosing other
 			dateKey = otherDate;
@@ -68,7 +69,10 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 	return (
 		<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'grid', placeItems: 'center', zIndex: 50 }}>
 			<div className="panel" style={{ width: 'min(640px, 92vw)', maxHeight: '90vh', overflow: 'auto' }}>
-				<h3 style={{ marginTop: 0 }}>Add Task</h3>
+				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+					<h3 style={{ marginTop: 0 }}>Add Task</h3>
+					<button className="btn btn-primary" onClick={submit} disabled={!title.trim()}>Save</button>
+				</div>
 				<div style={{ display: 'grid', gap: 10 }}>
 					<input className="input" placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
@@ -151,7 +155,6 @@ export default function AddTaskModal({ open, onClose, onSave }: {
 				</div>
 				<div style={{ position: 'sticky', bottom: 0, display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12, background: 'var(--panel)', paddingTop: 8 }}>
 					<button className="btn" onClick={onClose}>Cancel</button>
-					<button className="btn btn-primary" onClick={submit} disabled={!title.trim()}>Save</button>
 				</div>
 			</div>
 		</div>
