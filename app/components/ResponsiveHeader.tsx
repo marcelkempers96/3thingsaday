@@ -3,12 +3,37 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function ResponsiveHeader() {
 	const pathname = usePathname();
 	const [open, setOpen] = useState(false);
+	const [userName, setUserName] = useState<string | null>(null);
 
 	useEffect(() => { setOpen(false); }, [pathname]);
+
+	useEffect(() => {
+		let unsub: (() => void) | null = null;
+		supabase.auth.getUser().then(({ data }) => {
+			const u = data.user; if (!u) { setUserName(null); return; }
+			const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || null;
+			setUserName(name);
+		}).catch(() => {});
+		const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+			const u = session?.user || null;
+			if (!u) { setUserName(null); return; }
+			const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || null;
+			setUserName(name);
+		});
+		unsub = () => { try { data.subscription.unsubscribe(); } catch {} };
+		return () => { if (unsub) unsub(); };
+	}, []);
+
+	async function signOut() {
+		try { await supabase.auth.signOut(); } catch {}
+		try { window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+		try { window.location.href = '/sign-in'; } catch {}
+	}
 
 	return (
 		<header className="header" style={{ position: 'sticky', top: 0, background: 'transparent', zIndex: 20, paddingTop: 'max(8px, env(safe-area-inset-top))' }}>
@@ -24,7 +49,11 @@ export default function ResponsiveHeader() {
 				<Link className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} href="/priority-matrix" prefetch={false}>Priority Matrix</Link>
 				<Link className={pathname?.startsWith('/projects') ? 'active' : ''} href="/projects" prefetch={false}>Projects</Link>
 				<Link className={pathname?.startsWith('/calendar') ? 'active' : ''} href="/calendar" prefetch={false}>Calendar</Link>
-				<Link className={pathname?.startsWith('/sign-in') ? 'active' : ''} href="/sign-in" prefetch={false}>Sign In</Link>
+				{userName ? (
+					<button className="btn" onClick={signOut}>Sign out</button>
+				) : (
+					<Link className={pathname?.startsWith('/sign-in') ? 'active' : ''} href="/sign-in" prefetch={false}>Sign In</Link>
+				)}
 				<Link className={pathname?.startsWith('/settings') ? 'active' : ''} href="/settings" prefetch={false}>Settings</Link>
 			</nav>
 
@@ -41,7 +70,11 @@ export default function ResponsiveHeader() {
 						<Link href="/priority-matrix" prefetch={false} className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} onClick={() => setOpen(false)}>Priority Matrix</Link>
 						<Link href="/projects" prefetch={false} className={pathname?.startsWith('/projects') ? 'active' : ''} onClick={() => setOpen(false)}>Projects</Link>
 						<Link href="/calendar" prefetch={false} className={pathname?.startsWith('/calendar') ? 'active' : ''} onClick={() => setOpen(false)}>Calendar</Link>
-						<Link href="/sign-in" prefetch={false} className={pathname?.startsWith('/sign-in') ? 'active' : ''} onClick={() => setOpen(false)}>Sign In</Link>
+						{userName ? (
+							<button className="btn" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(false); signOut(); }}>Sign out</button>
+						) : (
+							<Link href="/sign-in" prefetch={false} className={pathname?.startsWith('/sign-in') ? 'active' : ''} onClick={() => setOpen(false)}>Sign In</Link>
+						)}
 						<Link href="/settings" prefetch={false} className={pathname?.startsWith('/settings') ? 'active' : ''} onClick={() => setOpen(false)}>Settings</Link>
 					</div>
 				</div>
