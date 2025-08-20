@@ -10,7 +10,7 @@ import { loadProjects, saveProjects } from '@/lib/projects';
 import { getLastSyncInfo, syncPull, syncPush } from '@/lib/sync';
 
 export default function SettingsPage() {
-	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes, language, setLanguage } = useSettings();
+	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes, language, setLanguage, theme, setTheme, colorScheme, setColorScheme, font, setFont } = useSettings();
 	const S = useMemo(() => getStrings(language), [language]);
 	const [saved, setSaved] = useState<string>('');
 	const fileRef = useRef<HTMLInputElement>(null);
@@ -61,6 +61,52 @@ export default function SettingsPage() {
 					<Link className="btn" href="/">← Back</Link>
 				</div>
 				<div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+						<div>
+							<label className="small muted">Theme</label><br />
+							<select className="input" value={theme} onChange={(e) => setTheme(e.target.value as any)}>
+								<option value="light">Light</option>
+								<option value="dark">Dark</option>
+							</select>
+						</div>
+						<div>
+							<label className="small muted">Colors</label><br />
+							<select className="input" value={colorScheme} onChange={(e) => setColorScheme(e.target.value as any)}>
+								<option value="apple">Apple Green</option>
+								<option value="neonlime">Neon Lime</option>
+								<option value="tangerine">Tangerine</option>
+								<option value="sunflower">Sunflower</option>
+								<option value="crimson">Crimson</option>
+								<option value="coral">Coral Red</option>
+								<option value="sky">Sky Blue</option>
+								<option value="aqua">Aqua</option>
+								<option value="royal">Royal Purple</option>
+								<option value="amethyst">Amethyst</option>
+								<option value="charcoal">Charcoal</option>
+								<option value="graphite">Graphite</option>
+								<option value="silver">Silver</option>
+								<option value="porcelain">Porcelain</option>
+								<option value="mint">Mint</option>
+								<option value="blush">Blush</option>
+							</select>
+						</div>
+						<div>
+							<label className="small muted">Language</label><br />
+							<select className="input" value={language} onChange={(e) => setLanguage(e.target.value as any)}>
+								<option value="en">English</option>
+								<option value="nl">Nederlands</option>
+								<option value="zh">中文</option>
+							</select>
+						</div>
+						<div>
+							<label className="small muted">Font</label><br />
+							<select className="input" value={font} onChange={(e) => setFont(e.target.value as any)}>
+								<option value="baloo">Baloo</option>
+								<option value="nunito">Nunito</option>
+								<option value="inter">Inter</option>
+							</select>
+						</div>
+					</div>
 					<div>
 						<label className="small muted">Language</label><br />
 						<select className="input" value={language} onChange={(e) => setLanguage(e.target.value as any)}>

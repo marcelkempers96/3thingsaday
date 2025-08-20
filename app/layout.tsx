@@ -7,7 +7,6 @@ import './globals.css';
 import { ReactNode } from 'react';
 import Providers from './providers';
 import ResponsiveHeader from './components/ResponsiveHeader';
-import FooterControls from './components/FooterControls';
 
 function ErrorBoundary({ children }: { children: ReactNode }) {
   try { return <>{children}</>; } catch (e) { return <div className="panel">Something went wrong. Please refresh.</div>; }
@@ -23,7 +22,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <ErrorBoundary>
               {children}
             </ErrorBoundary>
-            <FooterControls />
           </div>
         </Providers>
       </body>
