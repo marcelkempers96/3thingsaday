@@ -21,16 +21,22 @@ export default function FooterControls() {
 					<div>
 						<label className="small muted">{language === 'zh' ? '颜色' : 'Colors'}</label><br />
 						<select className="input" value={colorScheme} onChange={(e) => setColorScheme(e.target.value as any)}>
-							<option value="green">Green</option>
-							<option value="blue">Blue</option>
-							<option value="purple">Purple</option>
-							<option value="orange">Orange</option>
-							<option value="rose">Rose</option>
-							<option value="teal">Teal</option>
-							<option value="cyan">Cyan</option>
-							<option value="amber">Amber</option>
-							<option value="lime">Lime</option>
-							<option value="indigo">Indigo</option>
+							<option value="apple">Apple Green</option>
+							<option value="neonlime">Neon Lime</option>
+							<option value="tangerine">Tangerine</option>
+							<option value="sunflower">Sunflower</option>
+							<option value="crimson">Crimson</option>
+							<option value="coral">Coral Red</option>
+							<option value="sky">Sky Blue</option>
+							<option value="aqua">Aqua</option>
+							<option value="royal">Royal Purple</option>
+							<option value="amethyst">Amethyst</option>
+							<option value="charcoal">Charcoal</option>
+							<option value="graphite">Graphite</option>
+							<option value="silver">Silver</option>
+							<option value="porcelain">Porcelain</option>
+							<option value="mint">Mint</option>
+							<option value="blush">Blush</option>
 						</select>
 					</div>
 					<div>

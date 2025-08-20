@@ -66,7 +66,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     const clsDark = 'theme-dark';
     document.body.classList.remove(clsLight, clsDark);
     document.body.classList.add(settings.theme === 'dark' ? clsDark : clsLight);
-    const colorClasses = ['color-green','color-blue','color-purple','color-orange','color-rose'];
+    const colorClasses = [
+      'color-apple','color-neonlime','color-tangerine','color-sunflower','color-crimson','color-coral',
+      'color-sky','color-aqua','color-royal','color-amethyst','color-charcoal','color-graphite',
+      'color-silver','color-porcelain','color-mint','color-blush'
+    ];
     document.body.classList.remove(...colorClasses);
     document.body.classList.add(`color-${settings.colorScheme}`);
     saveSettings(settings);

@@ -12,16 +12,22 @@
 
 /***** Color schemes *****/
 /* Color scheme variables (light) */
-.color-green { --accent: #58cc02; --accent-2: #16a34a; }
-.color-blue { --accent: #3b82f6; --accent-2: #60a5fa; }
-.color-purple { --accent: #7c5cff; --accent-2: #9b7dff; }
-.color-orange { --accent: #fb923c; --accent-2: #fdba74; }
-.color-rose { --accent: #fb7185; --accent-2: #fda4af; }
-.color-teal { --accent: #14b8a6; --accent-2: #2dd4bf; }
-.color-cyan { --accent: #06b6d4; --accent-2: #22d3ee; }
-.color-amber { --accent: #f59e0b; --accent-2: #fbbf24; }
-.color-lime { --accent: #84cc16; --accent-2: #a3e635; }
-.color-indigo { --accent: #6366f1; --accent-2: #818cf8; }
+.color-apple { --accent: #7AC70C; --accent-2: #5aa100; }
+.color-neonlime { --accent: #8EE000; --accent-2: #6bb400; }
+.color-tangerine { --accent: #FAA918; --accent-2: #d68910; }
+.color-sunflower { --accent: #FFC715; --accent-2: #d4a20f; }
+.color-crimson { --accent: #D33131; --accent-2: #a82828; }
+.color-coral { --accent: #E53838; --accent-2: #bb2e2e; }
+.color-sky { --accent: #1CB0F6; --accent-2: #0f8ccd; }
+.color-aqua { --accent: #14D4F4; --accent-2: #0fb4cf; }
+.color-royal { --accent: #8549BA; --accent-2: #6c3a97; }
+.color-amethyst { --accent: #A560E8; --accent-2: #8a4cc3; }
+.color-charcoal { --accent: #4C4C4C; --accent-2: #3a3a3a; }
+.color-graphite { --accent: #6F6F6F; --accent-2: #565656; }
+.color-silver { --accent: #CFCFCF; --accent-2: #b5b5b5; }
+.color-porcelain { --accent: #F0F0F0; --accent-2: #d9d9d9; }
+.color-mint { --accent: #BFF199; --accent-2: #9ddf6e; }
+.color-blush { --accent: #F7C8C9; --accent-2: #e9a9ab; }
 
 * {
   box-sizing: border-box;

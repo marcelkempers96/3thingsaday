@@ -1,7 +1,7 @@
 export type Theme = 'light' | 'dark';
 export type Language = 'en' | 'nl' | 'zh';
 export type FontChoice = 'baloo' | 'nunito' | 'inter';
-export type ColorScheme = 'green' | 'blue' | 'purple' | 'orange' | 'rose' | 'teal' | 'cyan' | 'amber' | 'lime' | 'indigo';
+export type ColorScheme = 'apple' | 'neonlime' | 'tangerine' | 'sunflower' | 'crimson' | 'coral' | 'sky' | 'aqua' | 'royal' | 'amethyst' | 'charcoal' | 'graphite' | 'silver' | 'porcelain' | 'mint' | 'blush';
 
 export type CountdownMode = 'endOfDay' | 'sleepTime' | 'customTime' | 'nextMeal';
 
@@ -30,7 +30,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sleepTimeHHMM: '23:00',
   customTimeHHMM: '18:00',
   mealTimes: { breakfast: '08:00', lunch: '12:30', dinner: '18:30' },
-  colorScheme: 'green',
+  colorScheme: 'apple',
   rememberGoogle: true,
   rememberSync: true
 };
