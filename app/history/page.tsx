@@ -1,17 +1,40 @@
 "use client";
 
 import { useMemo, useState } from 'react';
-import { loadAllDays, type Task } from '@/lib/storage';
-import { formatDateKeyToHuman } from '@/lib/time';
+import { loadAllDays, saveAllDays, type Task, type DailyTasksByDate } from '@/lib/storage';
+import { formatDateKeyToHuman, getTodayKey } from '@/lib/time';
 import { useSettings } from '@/app/providers';
 import { getStrings } from '@/lib/i18n';
 import { loadProjects } from '@/lib/projects';
+import { newId } from '@/lib/uid';
 
 export default function HistoryPage() {
   const { language } = useSettings();
   const S = getStrings(language);
   const [query, setQuery] = useState('');
-  const days = useMemo(() => loadAllDays(), []);
+  const [days, setDays] = useState<DailyTasksByDate>(loadAllDays());
+
+  function updateDays(next: DailyTasksByDate) {
+    saveAllDays(next);
+    setDays(next);
+    try { window.dispatchEvent(new Event('focus3:data')); } catch {}
+  }
+
+  function toggleTaskInHistory(dateKey: string, taskId: string) {
+    const d = days[dateKey]; if (!d) return;
+    const nextTasks = d.tasks.map(t => t.id === taskId ? { ...t, done: !t.done } : t);
+    const next: DailyTasksByDate = { ...days, [dateKey]: { ...d, tasks: nextTasks } };
+    updateDays(next);
+  }
+
+  function bringToToday(_dateKey: string, task: Task) {
+    const todayKey = getTodayKey();
+    const today = days[todayKey] || { dateKey: todayKey, tasks: [] };
+    const duplicated: Task = { ...task, id: newId(), done: false };
+    const nextToday = { ...today, tasks: [...today.tasks, duplicated] };
+    const next: DailyTasksByDate = { ...days, [todayKey]: nextToday };
+    updateDays(next);
+  }
 
   const entries = useMemo(() => {
     const keys = Object.keys(days).sort((a, b) => b.localeCompare(a));
@@ -77,7 +100,10 @@ export default function HistoryPage() {
                         </div>
                       )}
                     </div>
-                    <div className="small muted">{t.done ? S.done : S.open}</div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <button className="btn" onClick={() => toggleTaskInHistory(key, t.id)}>{t.done ? 'Mark open' : 'Mark done'}</button>
+                      {t.done ? <button className="btn" onClick={() => bringToToday(key, t)}>Bring to Today</button> : null}
+                    </div>
                   </div>
                 ))}
               </div>
