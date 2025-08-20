@@ -50,16 +50,19 @@ export default function ResponsiveHeader() {
 				<Link className={pathname === '/' ? 'active' : ''} href="/" prefetch={false}>{S.today}</Link>
 				<Link className={pathname?.startsWith('/achievements') ? 'active' : ''} href="/achievements" prefetch={false}>{S.achievements}</Link>
 				<Link className={pathname?.startsWith('/history') ? 'active' : ''} href="/history" prefetch={false}>{S.history}</Link>
-				<Link className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} href="/priority-matrix" prefetch={false}>Priority Matrix</Link>
+				<Link className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} href="/priority-matrix" prefetch={false}>Matrix</Link>
 				<Link className={pathname?.startsWith('/projects') ? 'active' : ''} href="/projects" prefetch={false}>Projects</Link>
 				<Link className={pathname?.startsWith('/calendar') ? 'active' : ''} href="/calendar" prefetch={false}>Calendar</Link>
-				{userName ? (
-					<button className="btn" onClick={signOut}>{language === 'zh' ? '退出' : 'Sign out'}</button>
-				) : (
+				{!userName ? (
 					<Link className={pathname?.startsWith('/sign-in') ? 'active' : ''} href="/sign-in" prefetch={false}>{language === 'zh' ? '登录' : 'Sign In'}</Link>
-				)}
+				) : null}
 				<Link className={pathname?.startsWith('/settings') ? 'active' : ''} href="/settings" prefetch={false}>Settings</Link>
 			</nav>
+			{userName ? (
+				<div className="desktop-only">
+					<button className="btn" onClick={signOut}>{language === 'zh' ? '退出' : 'Sign out'}</button>
+				</div>
+			) : null}
 
 			<div className="mobile-only">
 				<button className="btn btn-primary" onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }} aria-expanded={open} aria-controls="mobile-menu">Menu ▾</button>
@@ -71,7 +74,7 @@ export default function ResponsiveHeader() {
 						<Link href="/" prefetch={false} className={pathname === '/' ? 'active' : ''} onClick={() => setOpen(false)}>{S.today}</Link>
 						<Link href="/achievements" prefetch={false} className={pathname?.startsWith('/achievements') ? 'active' : ''} onClick={() => setOpen(false)}>{S.achievements}</Link>
 						<Link href="/history" prefetch={false} className={pathname?.startsWith('/history') ? 'active' : ''} onClick={() => setOpen(false)}>{S.history}</Link>
-						<Link href="/priority-matrix" prefetch={false} className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} onClick={() => setOpen(false)}>Priority Matrix</Link>
+						<Link href="/priority-matrix" prefetch={false} className={pathname?.startsWith('/priority-matrix') ? 'active' : ''} onClick={() => setOpen(false)}>Matrix</Link>
 						<Link href="/projects" prefetch={false} className={pathname?.startsWith('/projects') ? 'active' : ''} onClick={() => setOpen(false)}>Projects</Link>
 						<Link href="/calendar" prefetch={false} className={pathname?.startsWith('/calendar') ? 'active' : ''} onClick={() => setOpen(false)}>Calendar</Link>
 						{userName ? (
