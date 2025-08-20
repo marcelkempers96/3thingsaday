@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Settings, Theme, Language, FontChoice, CountdownMode, ColorScheme } from '@/lib/settings';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from '@/lib/settings';
 import { fontBaloo, fontInter, fontNunito } from '@/app/fonts';
@@ -72,15 +72,51 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, [settings, ready]);
 
   useEffect(() => {
+    const rtChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
     // Pull cloud data when signed in
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         await syncPull();
         window.dispatchEvent(new Event('focus3:refresh'));
+        try {
+          // Subscribe to realtime changes for this user's row to auto-pull
+          const channel = supabase
+            .channel('user_data_sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'user_data', filter: `user_id=eq.${data.user.id}` }, async () => {
+              try { await syncPull(); window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+            })
+            .subscribe();
+          rtChannelRef.current = channel;
+        } catch {}
       }
     }).catch(() => {});
+    // Also push immediately on new sign-in so offline-created local data gets uploaded
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      try {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await syncPull();
+          await syncPush();
+          window.dispatchEvent(new Event('focus3:refresh'));
+          // Reset realtime subscription with fresh user id
+          try { rtChannelRef.current?.unsubscribe(); } catch {}
+          try {
+            const channel = supabase
+              .channel('user_data_sync')
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'user_data', filter: `user_id=eq.${session.user.id}` }, async () => {
+                try { await syncPull(); window.dispatchEvent(new Event('focus3:refresh')); } catch {}
+              })
+              .subscribe();
+            rtChannelRef.current = channel;
+          } catch {}
+        } else if (event === 'SIGNED_OUT') {
+          try { rtChannelRef.current?.unsubscribe(); rtChannelRef.current = null; } catch {}
+        }
+      } catch {}
+    });
     // Push periodically
     const id = setInterval(() => { syncPush().catch(() => {}); }, 20_000);
+    // Pull periodically as a fallback (in case realtime is disabled)
+    const pullId = setInterval(() => { syncPull().catch(() => {}); }, 30_000);
     // Push whenever local data changes (debounced)
     let debounceId: any = null;
     const schedulePush = () => {
@@ -91,8 +127,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     window.addEventListener('focus3:projects', schedulePush);
     return () => {
       clearInterval(id);
+      clearInterval(pullId);
       window.removeEventListener('focus3:data', schedulePush);
       window.removeEventListener('focus3:projects', schedulePush);
+      try { authListener?.subscription?.unsubscribe(); } catch {}
+      try { rtChannelRef.current?.unsubscribe(); } catch {}
     };
   }, []);
 
