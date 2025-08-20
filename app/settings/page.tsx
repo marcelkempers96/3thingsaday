@@ -1,6 +1,8 @@
 "use client";
 
 import { useSettings } from '@/app/providers';
+import { useMemo } from 'react';
+import { getStrings } from '@/lib/i18n';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { loadAllDays, saveAllDays } from '@/lib/storage';
@@ -8,7 +10,8 @@ import { loadProjects, saveProjects } from '@/lib/projects';
 import { getLastSyncInfo, syncPull, syncPush } from '@/lib/sync';
 
 export default function SettingsPage() {
-	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes } = useSettings();
+	const { countdownMode, setCountdownMode, sleepTimeHHMM, setSleepTime, customTimeHHMM, setCustomTime, mealTimes, setMealTimes, language, setLanguage } = useSettings();
+	const S = useMemo(() => getStrings(language), [language]);
 	const [saved, setSaved] = useState<string>('');
 	const fileRef = useRef<HTMLInputElement>(null);
 	const [syncAt, setSyncAt] = useState<string | null>(null);
@@ -58,6 +61,14 @@ export default function SettingsPage() {
 					<Link className="btn" href="/">← Back</Link>
 				</div>
 				<div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+					<div>
+						<label className="small muted">Language</label><br />
+						<select className="input" value={language} onChange={(e) => setLanguage(e.target.value as any)}>
+							<option value="en">English</option>
+							<option value="nl">Nederlands</option>
+							<option value="zh">中文</option>
+						</select>
+					</div>
 					<div>
 						<label className="small muted">Countdown target</label><br />
 						<select className="input" value={countdownMode} onChange={(e) => setCountdownMode(e.target.value as any)}>

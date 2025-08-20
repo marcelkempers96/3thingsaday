@@ -77,6 +77,32 @@ export const STRINGS: Record<Language, Strings> = {
     tasksDoneShort: (done, total) => `${done} / ${total} klaar`,
     quoteOfTheDay: 'Quote van de dag'
   }
+  ,
+  zh: {
+    today: '今天',
+    achievements: '成就',
+    history: '历史',
+    timeLeft: '剩余时间',
+    addPlaceholder: '添加你今天的 3–5 个优先事项…',
+    addButton: '添加',
+    aim: '目标是 3 个核心任务，需要时可添加更多。',
+    motivation: '勾选任务可累积连续天数并获得徽章。数据会在浏览器中离线保存。',
+    viewAchievements: '查看成就 →',
+    seeHistory: '查看历史 →',
+    badges: '徽章',
+    currentStreak: '当前连续天数',
+    best: (n) => `最佳：连续 ${n} 天`,
+    allTimeDays: '累计记录的天数',
+    tasksCompleted: '完成的任务',
+    acrossAllDays: '所有天数合计',
+    startToday: '从今天开始！',
+    searchDates: '搜索日期（例如 2025-01-01）',
+    done: '已完成',
+    open: '未完成',
+    noDaysYet: '还没有记录。请在“今天”页面添加任务。',
+    tasksDoneShort: (done, total) => `${done} / ${total} 已完成`,
+    quoteOfTheDay: '每日一句'
+  }
 };
 
 export function getStrings(language: Language): Strings {

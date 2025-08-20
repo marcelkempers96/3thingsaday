@@ -1,5 +1,5 @@
 export type Theme = 'light' | 'dark';
-export type Language = 'en' | 'nl';
+export type Language = 'en' | 'nl' | 'zh';
 export type FontChoice = 'baloo' | 'nunito' | 'inter';
 export type ColorScheme = 'green' | 'blue' | 'purple' | 'orange' | 'rose' | 'teal' | 'cyan' | 'amber' | 'lime' | 'indigo';
 
