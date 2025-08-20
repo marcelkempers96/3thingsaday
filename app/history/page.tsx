@@ -36,6 +36,13 @@ export default function HistoryPage() {
     updateDays(next);
   }
 
+  function deleteTaskInHistory(dateKey: string, taskId: string) {
+    const d = days[dateKey]; if (!d) return;
+    const nextTasks = d.tasks.filter(t => t.id !== taskId);
+    const next: DailyTasksByDate = { ...days, [dateKey]: { ...d, tasks: nextTasks } };
+    updateDays(next);
+  }
+
   const entries = useMemo(() => {
     const keys = Object.keys(days).sort((a, b) => b.localeCompare(a));
     const filtered = keys.filter(k => !query || formatDateKeyToHuman(k).toLowerCase().includes(query.toLowerCase()));
@@ -103,6 +110,7 @@ export default function HistoryPage() {
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <button className="btn" onClick={() => toggleTaskInHistory(key, t.id)}>{t.done ? 'Mark open' : 'Mark done'}</button>
                       {t.done ? <button className="btn" onClick={() => bringToToday(key, t)}>Bring to Today</button> : null}
+                      <button className="btn" onClick={() => deleteTaskInHistory(key, t.id)}>Delete</button>
                     </div>
                   </div>
                 ))}
