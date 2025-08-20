@@ -17,7 +17,11 @@ export default function AchievementsPage() {
     return () => window.removeEventListener('focus', on);
   }, []);
 
-  const days = useMemo(() => loadAllDays(), [refresh]);
+  const days = useMemo(() => {
+    // Touch refresh so the dependency is not considered unnecessary by linter
+    void refresh;
+    return loadAllDays();
+  }, [refresh]);
   const streaks = useMemo(() => computeStreaks(days), [days]);
   const badges = useMemo(() => computeBadges(streaks, days), [streaks, days]);
 

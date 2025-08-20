@@ -33,6 +33,7 @@ export function useSettings(): SettingsContextValue {
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [ready, setReady] = useState(false);
+  const rtChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     const s = loadSettings();
@@ -72,7 +73,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, [settings, ready]);
 
   useEffect(() => {
-    const rtChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
     // Pull cloud data when signed in
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
